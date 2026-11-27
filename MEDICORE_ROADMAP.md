@@ -31,7 +31,8 @@ Actualizado el 27 de noviembre de 2026. Usar este registro junto con el prompt m
 | 07D · Kanban | Baja · PENDIENTE | Opcional. Depende de transiciones acordadas. |
 | 08–11 · Módulos, movimiento, accesibilidad y responsive | Media · PENDIENTE | Ficha y tema ya operativos. Revisar por módulo después de la validación visual. |
 | 12A · Notificaciones | Media · PENDIENTE | Aviso, permiso, sonido, lectura individual y enlace ya implementados. Evaluar contador y lectura masiva. |
-| 12B–E · Búsqueda, exportación, perfil y ayuda | Baja · PENDIENTE | Evaluar valor y necesidades de permisos. |
+| 12C · Exportación | Alta · EN VALIDACIÓN | CSV de los resultados filtrados de la bandeja. |
+| 12B/D/E · Búsqueda, perfil y ayuda | Baja · PENDIENTE | Evaluar valor y necesidades de permisos. |
 | 13 · Demo y onboarding | Media · PENDIENTE | Perfiles y guion existentes. Aislamiento y restablecimiento por definir. |
 | 14–15 · Rendimiento y entrega | Alta · PENDIENTE | Medir primero. PWA opcional. QA integral al cerrar el producto. |
 | 16 · Premium | RESERVADA | Fuera del alcance Free. |
@@ -74,3 +75,4 @@ Retirada por decisión del usuario. La aplicación abre en el dominio raíz y co
 La entrega se centra en las siete historias del Sprint 1 y en mejoras demostrables del prompt maestro. HU-TI3 se conserva como extra opcional de la demo. HU-MD2, HU-CM2 y HU-JUR3 quedan fuera del alcance de esta presentación.
 
 - **Centro de control · Fase 06, EN VALIDACIÓN.** Accesos por perfil, indicadores y actividad reciente en el inicio. Admisión y las áreas resolutoras consultan sus rutas autorizadas. Enfermería conserva el acceso de registro. Los totales se derivan de los registros obtenidos en cada sesión, sin métricas simuladas.
+- **Exportación CSV · Fase 12C, EN VALIDACIÓN.** La bandeja genera un archivo UTF-8 con las filas visibles tras aplicar los filtros. La exportación opera sobre el resultado autorizado ya cargado. Pruebas en Edge confirmaron actualización, cambio de perfil, filtros, descarga y neutralización de fórmulas. El build y las nueve pruebas de dominio y arquitectura pasaron.

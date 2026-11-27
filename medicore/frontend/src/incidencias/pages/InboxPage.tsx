@@ -1,4 +1,4 @@
-import { ArrowRight, Search } from 'lucide-react'
+import { ArrowRight, Download, Search } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Card, PageTitle, PriorityBadge, SelectInput, StatusBadge, TextInput } from '../../shared/components'
@@ -8,6 +8,7 @@ import { equipmentIncidentsPath } from '../api/equipmentIncidents'
 import { generalServicesIncidentsPath, type GeneralServicesFloorGroup } from '../api/generalServicesIncidents'
 import { supportAlertsPath } from '../api/itAlerts'
 import { useIncidents } from '../context/IncidentContext'
+import { exportIncidentList } from '../utils/exportIncidentList'
 
 export default function InboxPage() {
   const role = useIncidents().state.activeRole
@@ -48,7 +49,10 @@ function IncidentInbox({ role }: { role: 'it-support' | 'biomedical' | 'general-
   return <>
     <PageTitle title={title} description={description} />
     <Card className="mb-5 p-4"><div className="grid gap-3 md:grid-cols-[minmax(260px,1fr)_190px_170px]"><label className="relative"><Search size={17} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" /><TextInput value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar por ID o descripción" className="pl-9" aria-label="Buscar incidentes" /></label><SelectInput aria-label="Prioridad" value={priority} onChange={(event) => setPriority(event.target.value)}><option>Todas</option>{['Crítica', 'Alta', 'Media', 'Baja'].map((item) => <option key={item}>{item}</option>)}</SelectInput><SelectInput aria-label="Piso" value={floor} onChange={(event) => setFloor(event.target.value)}><option>Todos</option>{floors.map((item) => <option key={item} value={item}>Piso {item}</option>)}</SelectInput></div></Card>
-    <Card className="overflow-hidden"><div className="flex items-center justify-between border-b border-line px-5 py-4"><div><h2 className="font-semibold">{isIT ? 'Alertas recibidas' : isBiomedical ? 'Incidentes de equipos' : 'Bandeja de incidentes'}</h2><p className="mt-1 text-xs text-muted">{count} resultados · ordenados por piso y prioridad</p></div></div>
+    <Card className="overflow-hidden"><div className="flex flex-wrap items-center justify-between gap-2 border-b border-line px-5 py-4"><div><h2 className="font-semibold">{isIT ? 'Alertas recibidas' : isBiomedical ? 'Incidentes de equipos' : 'Bandeja de incidentes'}</h2><p className="mt-1 text-xs text-muted">{count} resultados · ordenados por piso y prioridad</p></div>
+      <button type="button" className="mc-button mc-button-secondary mc-button-compact" disabled={!count || loading || Boolean(error)} onClick={() => exportIncidentList(groups.flatMap((group) => group.incidents), isIT)}>
+        <Download size={16} aria-hidden="true" /> Exportar CSV
+      </button></div>
       <div className="overflow-x-auto" role="region" aria-label="Tabla de incidentes" tabIndex={0}><table className="mc-table"><thead className="bg-slate-50 text-xs text-muted"><tr><th className="px-4 py-3 font-medium">Prioridad</th><th className="px-4 py-3 font-medium">ID / Incidente</th><th className="px-4 py-3 font-medium">Descripción</th><th className="px-4 py-3 font-medium">Ubicación</th><th className="px-4 py-3 font-medium">Estado</th>{isIT && <th className="px-4 py-3 font-medium">Acuse</th>}<th className="px-4 py-3 font-medium">Detalle</th></tr></thead>
         {groups.map((group) => <tbody key={group.floor ?? 'incidents'} className="divide-y divide-line">
           {group.floor !== null && <tr className="border-t border-line bg-sky-50/80"><th scope="rowgroup" colSpan={6} className="px-4 py-2 text-left font-semibold text-accent">Piso {group.floor}</th></tr>}
