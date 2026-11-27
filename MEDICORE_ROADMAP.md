@@ -26,7 +26,7 @@ Actualizado el 27 de noviembre de 2026. Usar este registro junto con el prompt m
 | 02 · Marca y entrada | Media · APROBADA | Isotipo común y presentación breve, repetible desde Perfil demo. |
 | 03 · Landing | NO NECESARIA | Retirada por decisión del usuario. La demo abre directamente. |
 | 04–05 · Acceso y navegación | Según demo · PENDIENTE | Priorizar el acceso existente por perfil. El login público queda fuera de la exposición actual. |
-| 06 · Control Center | Media · PENDIENTE | Inicio y accesos rápidos existentes. Definir métricas autorizadas a partir de datos reales. |
+| 06 · Control Center | Alta · EN VALIDACIÓN | Inicio y accesos rápidos existentes. Definir métricas autorizadas a partir de datos reales. |
 | 07A–C · Incidencias | Alta · PENDIENTE | Formularios, bandejas y detalle existentes. Alinear filtro y planificar avances del Sprint 2. |
 | 07D · Kanban | Baja · PENDIENTE | Opcional. Depende de transiciones acordadas. |
 | 08–11 · Módulos, movimiento, accesibilidad y responsive | Media · PENDIENTE | Ficha y tema ya operativos. Revisar por módulo después de la validación visual. |
@@ -68,4 +68,9 @@ Retirada por decisión del usuario. La aplicación abre en el dominio raíz y co
 - **Estructura para la exposición.** Formulario `ITDiagnosisCard` → `PUT /api/alertas-ti/:id/diagnostico` → controlador y assembler REST → `ITAlertCommandService` → contrato `ITAlertRepository` → adaptador Prisma. El diagnóstico pertenece al mismo agregado `ITAlert`. El ACL de Referencias Operativas sigue atendiendo la configuración de estaciones en el registro original de la alerta.
 - **Pruebas.** Build completo, 9 pruebas de dominio y arquitectura, y 8 resultados de integración HTTP con PostgreSQL en Docker. Se comprobó autorización, entradas inválidas, identidad del autor, estado abierto, persistencia tras reinicio y rechazo de cambios a un ticket resuelto.
 - **Verificación en Vercel.** La raíz y /demo abren la aplicación. La captura de la landing dejó de servirse. Se creó la alerta ficticia INC-TI-000004 desde Admisión, se guardó el diagnóstico como Soporte TI en móvil y se confirmó la siguiente acción al recargar con ambos perfiles. [Despliegue](https://vercel.com/carlos-071e/medicore-demo/3bgJCurf4WfqUp3qEYrpLfqjFwxo)
-- **Pendientes del Sprint 2.** Orden biomédica y disponibilidad del equipo (HU-MD2), seguimiento de Enfermería (HU-CM2) e inicio de atención con estimación de Servicios Generales (HU-JUR3). Desarrollar y probar un flujo por vez con los criterios del informe.
+
+## Enfoque de presentación
+
+La entrega se centra en las siete historias del Sprint 1 y en mejoras demostrables del prompt maestro. HU-TI3 se conserva como extra opcional de la demo. HU-MD2, HU-CM2 y HU-JUR3 quedan fuera del alcance de esta presentación.
+
+- **Centro de control · Fase 06, EN VALIDACIÓN.** Accesos por perfil, indicadores y actividad reciente en el inicio. Admisión y las áreas resolutoras consultan sus rutas autorizadas. Enfermería conserva el acceso de registro. Los totales se derivan de los registros obtenidos en cada sesión, sin métricas simuladas.
