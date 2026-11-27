@@ -26,7 +26,7 @@ export function Field({ label, error, children }: { label: string; error?: strin
   return <label className="block text-sm font-medium text-ink"><span className="mb-1.5 block">{label}</span>{children}{error && <span className="mt-1.5 block text-xs font-medium text-red-600">{error}</span>}</label>
 }
 
-export function TextInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
+export function TextInput(props: React.ComponentPropsWithRef<'input'>) {
   return <input {...props} className={`mc-control placeholder:text-muted ${props.className ?? ''}`} />
 }
 export function SelectInput(props: React.SelectHTMLAttributes<HTMLSelectElement>) {

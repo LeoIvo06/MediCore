@@ -205,7 +205,7 @@ button { cursor: pointer; }
     .mc-launch { bottom: calc(4.75rem + env(safe-area-inset-bottom)); }
   }
 
-  .mc-launch-pulse {
+  .mc-pulse {
     width: 100%;
     height: 2rem;
     color: #40ddd2;
@@ -215,11 +215,35 @@ button { cursor: pointer; }
     stroke-linejoin: round;
   }
 
-  .mc-launch-pulse circle { fill: currentColor; stroke: none; }
+  .mc-pulse circle { fill: currentColor; stroke: none; }
   .mc-pulse-track { opacity: 0.22; }
-  .mc-pulse-signal {
+  .mc-launch .mc-pulse-signal {
     stroke-dasharray: 1;
     animation: mc-pulse 590ms ease-out both;
+  }
+
+  .mc-loading {
+    display: grid;
+    justify-items: center;
+    align-content: center;
+    min-height: 9rem;
+    gap: 0.5rem;
+    padding: 1.25rem;
+    text-align: center;
+  }
+
+  .mc-loading-brand {
+    display: grid;
+    justify-items: center;
+    gap: 0.375rem;
+    width: min(100%, 9rem);
+  }
+
+  .mc-loading .mc-pulse { color: var(--color-accent); height: 1.5rem; }
+  .mc-loading .mc-pulse-signal { stroke-dasharray: 0.32 0.68; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .mc-loading .mc-pulse-signal { animation: mc-pulse 1.3s linear infinite; }
   }
 
   @keyframes mc-launch {
@@ -240,6 +264,6 @@ button { cursor: pointer; }
 
   @media (prefers-reduced-motion: reduce) {
     .mc-launch { animation: mc-launch-static 520ms linear both; }
-    .mc-pulse-signal { animation: none; }
+    .mc-launch .mc-pulse-signal { animation: none; }
   }
 }

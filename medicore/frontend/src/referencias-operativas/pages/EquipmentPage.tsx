@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { Card, PageTitle, StatusBadge } from '../../shared/components'
 import { useIncidents } from '../../incidencias/context/IncidentContext'
 import { DemoApiError } from '../../shared/api/demoApi'
+import { MediCoreLoading } from '../../shared/MediCoreBrand'
 import { useDemoQuery } from '../../shared/api/useDemoQuery'
 import { equipmentRecordPath, type EquipmentRecord } from '../api/equipmentRecords'
 
@@ -14,7 +15,7 @@ export default function EquipmentPage() {
   const allowed = role === 'biomedical'
   const { data: item, loading, error } = useDemoQuery<EquipmentRecord>(role, allowed ? equipmentRecordPath(equipmentId) : null)
   if (!allowed) return <p role="alert">La ficha está disponible para Ingeniería Biomédica.</p>
-  if (loading) return <p role="status">Cargando ficha técnica…</p>
+  if (loading) return <MediCoreLoading label="Cargando ficha técnica…" />
   if (!item) {
     const missing = error instanceof DemoApiError && error.status === 404
     return <p role="alert">{missing ? 'Equipo no encontrado.' : 'No se pudo cargar la ficha técnica.'}</p>

@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Card, PageTitle, PriorityBadge, StatusBadge } from '../../shared/components'
 import { roleLabels, type Incident, type UserRole } from '../../shared/types'
+import { MediCoreLoading } from '../../shared/MediCoreBrand'
 import { useDemoQuery } from '../../shared/api/useDemoQuery'
 import { equipmentIncidentsPath, myEquipmentReportsPath } from '../api/equipmentIncidents'
 import { generalServicesIncidentsPath, type GeneralServicesFloorGroup } from '../api/generalServicesIncidents'
@@ -103,14 +104,14 @@ function IncidentOverview({ role }: { role: UserRole }) {
   }
   const distribution = [...groups].sort(([name, a], [other, b]) => b - a || name.localeCompare(other, 'es-PE', { numeric: true }))
 
-  return <section aria-labelledby="summary-title" aria-busy={query.loading}>
+  return <section aria-labelledby="summary-title">
     <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
       <h2 id="summary-title" className="text-lg font-semibold">{panel.heading}</h2>
       <button type="button" className="mc-button mc-button-secondary mc-button-compact" onClick={() => setRevision((previous) => previous + 1)} disabled={query.loading}>
         <RefreshCw size={15} aria-hidden="true" /> Actualizar
       </button>
     </div>
-    {query.loading && <p role="status" className="text-sm text-muted">Cargando el resumen…</p>}
+    {query.loading && <MediCoreLoading label="Cargando el resumen…" />}
     {query.error && <p role="alert" className="text-sm text-red-600">No se pudo cargar el resumen. Pulsa Actualizar para reintentar.</p>}
     {query.data && <>
       <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
