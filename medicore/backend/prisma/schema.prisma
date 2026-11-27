@@ -1,0 +1,19 @@
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/shared/infrastructure/persistence/prisma/generated"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// Catálogo de ubicaciones del contexto Referencias Operativas.
+model OperationalLocation {
+  id    String @id
+  label String
+  floor Int
+
+  @@map("operational_locations")
+}
