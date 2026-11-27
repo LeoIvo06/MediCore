@@ -43,7 +43,7 @@ export function IncidentNotifications({ role, open, onToggle, onClose, trigger }
           const previousNewest = newestSeen
           if (previousNewest !== undefined && data.some(
             (item) => !item.readAt && !seen.has(item.incidentId) && item.createdAt >= previousNewest,
-          )) void playNotificationSound()
+          )) playNotificationSound()
           newestSeen ??= ''
           for (const item of data) {
             seen.add(item.incidentId)
@@ -140,7 +140,7 @@ export function IncidentNotifications({ role, open, onToggle, onClose, trigger }
         ref={trigger}
         type="button"
         className="relative grid size-11 place-items-center rounded-lg border border-line text-ink hover:bg-slate-100"
-        onClick={onToggle}
+        onClick={() => { armNotificationSound(); onToggle() }}
         aria-label={unread ? 'Notificaciones sin leer' : 'Notificaciones'}
         aria-controls="incident-notifications"
         aria-expanded={open}
