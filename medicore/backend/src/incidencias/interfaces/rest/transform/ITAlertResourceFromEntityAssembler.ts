@@ -1,8 +1,8 @@
-import { itAlertScope, type ITAlert } from '../../../domain/model/aggregates/ITAlert.js'
+import { itAlertId, itAlertScope, type ITAlert } from '../../../domain/model/aggregates/ITAlert.js'
 
 export function toITAlertResource(alert: ITAlert) {
   return {
-    id: `INC-TI-${String(alert.number).padStart(6, '0')}`,
+    id: itAlertId(alert.number),
     ...itAlertScope,
     title: `Alerta de sistema · ${alert.stationId}`,
     description: `Bloqueo reportado en ${alert.stationId}`,

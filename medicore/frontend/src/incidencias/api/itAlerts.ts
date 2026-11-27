@@ -1,3 +1,4 @@
+import { announceIncident } from './incidentNotifications'
 import { demoApi } from '../../shared/api/demoApi'
 import type { Incident } from '../../shared/types'
 
@@ -9,7 +10,7 @@ export function sendITAlert(stationId: string) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ stationId }),
-  })
+  }).then(announceIncident)
 }
 
 export function acknowledgeITAlert(id: string) {

@@ -17,19 +17,19 @@
 :root { font-family: var(--font-sans); color-scheme: light; color: var(--color-ink); background: var(--color-page); font-synthesis: none; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --color-page: #0b1722;
-  --color-surface: #142635;
-  --color-ink: #e9f3fa;
-  --color-muted: #a6bfd1;
-  --color-line: #304657;
-  --color-sidebar: #102738;
+  --color-page: #181818;
+  --color-surface: #232323;
+  --color-ink: #f1f1f1;
+  --color-muted: #b6b6b6;
+  --color-line: #444444;
+  --color-sidebar: #1d1d1d;
   --color-brand: #087b86;
   --color-brand-dark: #076570;
   --color-accent: #60d7df;
-  --color-slate-50: #1c3142;
-  --color-slate-100: #233a4c;
-  --color-slate-400: #94aabc;
-  --color-slate-600: #bccddd;
+  --color-slate-50: #2b2b2b;
+  --color-slate-100: #343434;
+  --color-slate-400: #aaa;
+  --color-slate-600: #cbcbcb;
   --color-cyan-50: #173b44;
   --color-sky-50: #172f44;
   --color-sky-100: #1e3c55;

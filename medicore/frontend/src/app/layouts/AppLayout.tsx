@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { roleLabels, type UserRole } from '../../shared/types'
 import { useIncidents } from '../../incidencias/context/IncidentContext'
+import { IncidentNotifications } from '../../incidencias/components/IncidentNotifications'
 
 const roleOptions: { value: UserRole; label: string }[] = [
   { value: 'nursing', label: 'Enfermería' }, { value: 'admissions', label: 'Admisión' },
@@ -12,12 +13,13 @@ const roleOptions: { value: UserRole; label: string }[] = [
 
 export default function AppLayout() {
   const { state, updateRole } = useIncidents()
-  const [activeMenu, setActiveMenu] = useState<'navigation' | 'profile' | null>(null)
+  const [activeMenu, setActiveMenu] = useState<'navigation' | 'profile' | 'notifications' | null>(null)
   const [dark, setDark] = useState(() => document.documentElement.dataset.theme === 'dark')
   const location = useLocation()
   const headerRef = useRef<HTMLElement>(null)
   const navigationTrigger = useRef<HTMLButtonElement>(null)
   const profileTrigger = useRef<HTMLButtonElement>(null)
+  const notificationsTrigger = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     if (!activeMenu) return
@@ -25,9 +27,10 @@ export default function AppLayout() {
       if (event.target instanceof Node && !headerRef.current?.contains(event.target)) setActiveMenu(null)
     }
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key !== 'Escape') return
+      if (event.key !== 'Escape' || !activeMenu) return
       setActiveMenu(null)
-      const trigger = activeMenu === 'navigation' ? navigationTrigger : profileTrigger
+      const triggers = { navigation: navigationTrigger, profile: profileTrigger, notifications: notificationsTrigger }
+      const trigger = triggers[activeMenu]
       trigger.current?.focus()
     }
 
@@ -96,9 +99,14 @@ export default function AppLayout() {
           </div>
           <div className="flex shrink-0 items-center gap-2 sm:gap-5">
             <span className="hidden text-xs text-muted sm:inline">{new Intl.DateTimeFormat('es-PE', { dateStyle: 'medium' }).format(new Date())}</span>
-            <button type="button" className="relative grid size-11 place-items-center rounded-lg border border-line text-ink" aria-label="Notificaciones">
-              <Bell size={18} aria-hidden="true" /><span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-red-500" />
-            </button>
+            <IncidentNotifications
+              key={state.activeRole}
+              role={state.activeRole}
+              trigger={notificationsTrigger}
+              open={activeMenu === 'notifications'}
+              onToggle={() => setActiveMenu(activeMenu === 'notifications' ? null : 'notifications')}
+              onClose={() => setActiveMenu(null)}
+            />
             <div className="hidden items-center gap-2 sm:flex">
               <div className="grid h-9 w-9 place-items-center rounded-full bg-brand text-xs font-bold text-white">{profile.initials}</div>
               <div className="hidden leading-tight xl:block"><div className="text-xs font-semibold">{profile.name}</div><div className="mt-1 text-[11px] text-muted">{profile.title}</div></div>

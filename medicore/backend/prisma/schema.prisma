@@ -72,6 +72,7 @@ model DemoUser {
   role         String
   passwordHash String
   sessions     DemoSession[]
+  notifications IncidentNotification[]
 
   @@map("demo_users")
 }
@@ -141,4 +142,17 @@ model DemoSession {
 
   @@index([expiresAt])
   @@map("demo_sessions")
+}
+
+model IncidentNotification {
+  recipientId String
+  incidentId  String
+  title       String
+  createdAt   DateTime
+  readAt      DateTime?
+  recipient   DemoUser @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+
+  @@id([recipientId, incidentId])
+  @@index([recipientId, readAt, createdAt])
+  @@map("incident_notifications")
 }

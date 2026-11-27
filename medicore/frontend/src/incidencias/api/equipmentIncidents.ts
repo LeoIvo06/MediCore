@@ -1,3 +1,4 @@
+import { announceIncident } from './incidentNotifications'
 import { demoApi } from '../../shared/api/demoApi'
 import type { Incident } from '../../shared/types'
 
@@ -15,5 +16,5 @@ export function registerEquipmentIncident(input: { equipmentId: string; location
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(input),
-  })
+  }).then(announceIncident)
 }

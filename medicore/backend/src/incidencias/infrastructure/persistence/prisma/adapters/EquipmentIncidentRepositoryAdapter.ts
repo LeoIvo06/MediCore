@@ -1,12 +1,20 @@
 import type { PrismaClient } from '../../../../../shared/infrastructure/persistence/prisma/generated/client.js'
-import type { EquipmentIncidentDraft } from '../../../../domain/model/aggregates/EquipmentIncident.js'
+import { equipmentIncidentId, equipmentIncidentScope, type EquipmentIncidentDraft } from '../../../../domain/model/aggregates/EquipmentIncident.js'
 import type { EquipmentIncidentRepository } from '../../../../domain/repositories/EquipmentIncidentRepository.js'
+
+import { recordIncidentNotifications } from './recordIncidentNotifications.js'
 
 export class EquipmentIncidentRepositoryAdapter implements EquipmentIncidentRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
   create(draft: EquipmentIncidentDraft) {
-    return this.prisma.equipmentIncident.create({ data: draft })
+    return this.prisma.$transaction(async (transaction) => {
+      const incident = await transaction.equipmentIncident.create({ data: draft })
+      await recordIncidentNotifications(transaction, { ...equipmentIncidentScope, reporterId: incident.reporterId }, {
+        incidentId: equipmentIncidentId(incident.number), title: `Reporte de equipo · ${incident.equipmentName}`, createdAt: incident.createdAt,
+      })
+      return incident
+    })
   }
 
   findByNumber(number: number) {

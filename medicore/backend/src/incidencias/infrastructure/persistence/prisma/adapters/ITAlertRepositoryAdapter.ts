@@ -1,12 +1,20 @@
 import type { PrismaClient } from '../../../../../shared/infrastructure/persistence/prisma/generated/client.js'
-import type { ITAlertDraft } from '../../../../domain/model/aggregates/ITAlert.js'
+import { itAlertId, itAlertScope, type ITAlertDraft } from '../../../../domain/model/aggregates/ITAlert.js'
 import type { ITAlertRepository } from '../../../../domain/repositories/ITAlertRepository.js'
+
+import { recordIncidentNotifications } from './recordIncidentNotifications.js'
 
 export class ITAlertRepositoryAdapter implements ITAlertRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
   create(draft: ITAlertDraft) {
-    return this.prisma.iTAlert.create({ data: draft })
+    return this.prisma.$transaction(async (transaction) => {
+      const incident = await transaction.iTAlert.create({ data: draft })
+      await recordIncidentNotifications(transaction, { ...itAlertScope, reporterId: incident.reporterId }, {
+        incidentId: itAlertId(incident.number), title: `Alerta de TI · ${incident.stationId}`, createdAt: incident.createdAt,
+      })
+      return incident
+    })
   }
 
   findByNumber(number: number) {

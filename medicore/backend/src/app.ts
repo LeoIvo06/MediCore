@@ -1,4 +1,7 @@
 import express from 'express'
+import { IncidentNotificationService } from './incidencias/application/internal/IncidentNotificationService.js'
+import { IncidentNotificationRepositoryAdapter } from './incidencias/infrastructure/persistence/prisma/adapters/IncidentNotificationRepositoryAdapter.js'
+import { createIncidentNotificationsController } from './incidencias/interfaces/rest/IncidentNotificationsController.js'
 import { GeneralServicesIncidentQueryService } from './incidencias/application/internal/queryservices/GeneralServicesIncidentQueryService.js'
 import { GeneralServicesIncidentRepositoryAdapter } from './incidencias/infrastructure/persistence/prisma/adapters/GeneralServicesIncidentRepositoryAdapter.js'
 import { createGeneralServicesIncidentsController } from './incidencias/interfaces/rest/GeneralServicesIncidentsController.js'
@@ -54,6 +57,8 @@ export function createApp(prisma: PrismaClient) {
   ))
   const generalServices = new GeneralServicesIncidentQueryService(new GeneralServicesIncidentRepositoryAdapter(prisma))
   app.use('/api/servicios-generales', createGeneralServicesIncidentsController(generalServices, requireRole))
+  const notifications = new IncidentNotificationService(new IncidentNotificationRepositoryAdapter(prisma))
+  app.use('/api/notificaciones', createIncidentNotificationsController(notifications, requireRole))
   app.use(globalExceptionHandler)
   return app
 }

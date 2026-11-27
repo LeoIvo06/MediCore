@@ -13,6 +13,10 @@ export interface ITAlert extends ITAlertDraft {
   acknowledgedAt: Date | null
 }
 
+export function itAlertId(number: number) {
+  return `INC-TI-${String(number).padStart(6, '0')}`
+}
+
 export const itAlertScope = { kind: 'alerta-ti', area: 'TI', priority: 'Crítica' } as const
 
 export function missingStationData(station: { location: string | null; ip: string | null }) {

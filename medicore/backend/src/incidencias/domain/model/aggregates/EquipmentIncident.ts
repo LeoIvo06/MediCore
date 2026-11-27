@@ -15,6 +15,10 @@ export type EquipmentIncident = EquipmentIncidentDraft & Readonly<{
   createdAt: Date
 }>
 
+export function equipmentIncidentId(number: number) {
+  return `INC-EQ-${String(number).padStart(6, '0')}`
+}
+
 export const equipmentIncidentScope = {
   area: 'Biomédica',
   kind: 'equipo-medico',

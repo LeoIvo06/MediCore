@@ -164,6 +164,30 @@ test('Sprint 1: las siete historias se ejercitan por HTTP y los datos sobreviven
     await request(path, 403, support)
   })
 
+  const notificationPath = '/notificaciones'
+  type Notice = { incidentId: string; readAt: string | null }
+
+  await t.test('las notificaciones se crean para el reportante y el área, con lectura individual', async () => {
+    await request(notificationPath, 401)
+    const ownReport = await request<Notice[]>(notificationPath, 200, nursing)
+    const areaReport = await request<Notice[]>(notificationPath, 200, biomedical)
+    const ownAlert = await request<Notice[]>(notificationPath, 200, admissions)
+    const areaAlert = await request<Notice[]>(notificationPath, 200, support)
+    assert.deepEqual(ownReport.map(({ incidentId, readAt }) => [incidentId, readAt]), [[equipmentId, null]])
+    assert.deepEqual(areaReport, ownReport)
+    assert.deepEqual(ownAlert.map(({ incidentId, readAt }) => [incidentId, readAt]), [[alertId, null]])
+    assert.deepEqual(areaAlert, ownAlert)
+    assert.deepEqual(await request(notificationPath, 200, general), [])
+    await request(notificationPath + '/' + equipmentId + '/lectura', 404, support, 'PUT')
+    const readingPath = notificationPath + '/' + equipmentId + '/lectura'
+    await request(readingPath, 200, biomedical, 'PUT')
+    const firstRead = (await request<Notice[]>(notificationPath, 200, biomedical))[0].readAt
+    assert.ok(firstRead)
+    await request(readingPath, 200, biomedical, 'PUT')
+    assert.equal((await request<Notice[]>(notificationPath, 200, biomedical))[0].readAt, firstRead)
+    assert.equal((await request<Notice[]>(notificationPath, 200, nursing))[0].readAt, null)
+  })
+
   await t.test('las sesiones, el reporte y el primer acuse sobreviven a la recreación de PostgreSQL', async () => {
     await server.close()
     const args = composeArgs(project)
@@ -178,5 +202,7 @@ test('Sprint 1: las siete historias se ejercitan por HTTP y los datos sobreviven
     await request(`${alertPath}/${alertId}`, 403, biomedical)
     assert.equal(alert.acknowledgedAt, acknowledgedAt)
     assert.equal(alert.open, true)
+    assert.ok((await request<Notice[]>(notificationPath, 200, biomedical))[0].readAt)
+    assert.equal((await request<Notice[]>(notificationPath, 200, nursing))[0].readAt, null)
   })
 })

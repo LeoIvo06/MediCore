@@ -1,8 +1,8 @@
-import { equipmentIncidentScope, type EquipmentIncident } from '../../../domain/model/aggregates/EquipmentIncident.js'
+import { equipmentIncidentId, equipmentIncidentScope, type EquipmentIncident } from '../../../domain/model/aggregates/EquipmentIncident.js'
 
 export function toEquipmentIncidentResource(incident: EquipmentIncident) {
   return {
-    id: `INC-EQ-${String(incident.number).padStart(6, '0')}`,
+    id: equipmentIncidentId(incident.number),
     ...equipmentIncidentScope,
     title: incident.equipmentName,
     description: `${incident.symptomLabel} · ${incident.locationLabel}`,
