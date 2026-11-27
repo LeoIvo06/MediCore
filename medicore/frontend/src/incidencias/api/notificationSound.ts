@@ -1,13 +1,31 @@
 let audio: AudioContext | undefined
 let player: HTMLAudioElement | undefined
+let nativeReady = false
+let priming: Promise<void> | undefined
+const silence = '/medicore-silencio.wav'
+const chime = '/medicore-aviso.wav'
 
 export function prefetchNotificationSound() {
-  if (player) return
-  player = new Audio('/medicore-aviso.wav')
-  player.preload = 'auto'
+  if (!player) {
+    player = new Audio(silence)
+    player.preload = 'auto'
+  }
+  return player
 }
 
 export function armNotificationSound() {
+  if (!nativeReady && !priming) {
+    const element = prefetchNotificationSound()
+    if (!element.src.endsWith(silence)) element.src = silence
+
+    // This track lets the browser authorize this same player without an audible test tone.
+    priming = element.play().then(() => {
+      nativeReady = true
+      element.pause()
+      element.src = chime
+    }).catch(() => {}).finally(() => { priming = undefined })
+  }
+
   if (typeof AudioContext === 'undefined') return
   try {
     audio ??= new AudioContext()
@@ -19,12 +37,13 @@ export function armNotificationSound() {
 
 export async function playNotificationSound(): Promise<boolean> {
   try {
-    prefetchNotificationSound()
-    if (player) {
-      player.currentTime = 0
-      await player.play()
-      return true
-    }
+    await priming
+    const element = prefetchNotificationSound()
+    if (!element.src.endsWith(chime)) element.src = chime
+    element.currentTime = 0
+    await element.play()
+    nativeReady = true
+    return true
   } catch {
     // Try the Web Audio tone if media playback is blocked or unavailable.
   }
