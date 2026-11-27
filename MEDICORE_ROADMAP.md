@@ -55,4 +55,5 @@ El prompt maestro guía el desarrollo. La autorización expresa del usuario defi
 - **MediCore Launch y Pulse.** Entrada de 880 ms, una vez por pestaña, con pulso SVG. El contenido sigue disponible mientras se muestra. En movimiento reducido aparece una versión estática que solo cambia de opacidad.
 - **Repetición.** Desde **Perfil demo → Repetir animación de entrada**. La opción devuelve el foco al botón de perfil.
 - **Pruebas locales.** El build pasó. Edge verificó inicio, recarga sin repetición, repetición manual, navegación, foco, tamaños de 360, 390 y 1440 px y movimiento reducido. Lint mantiene los dos avisos preexistentes.
+- **Pruebas en Vercel.** Edge reprodujo la entrada con temas claro y oscuro y con movimiento reducido. Verificó la carga de catálogos, el favicon, el recurso para compartir y PostgreSQL. [Despliegue](https://vercel.com/carlos-071e/medicore-demo/PLjFUdRpct3Qv4UzYuuHUwyCtneS)
 - **Siguiente fase.** La landing pública queda pendiente de aprobación de la Fase 02 y de una propuesta específica para la Fase 03.
