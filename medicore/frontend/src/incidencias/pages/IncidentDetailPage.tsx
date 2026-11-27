@@ -45,7 +45,8 @@ function IncidentView({ initial, role, endpoint }: { initial: Incident; role: Us
   const isAlert = incident.kind === 'alerta-ti'
   const responsibleRole = isAlert ? 'it-support' : incident.kind === 'equipo-medico' ? 'biomedical' : 'general-services'
   const canResolve = role === responsibleRole && incident.open !== false
-  const backPath = role === 'admissions' ? '/alerta-ti' : role === 'nursing' ? '/reportar-falla' : '/bandeja'
+  const backPath = role === 'admissions' ? '/alerta-ti' : role === 'nursing' ? '/' : '/bandeja'
+  const backLabel = role === 'nursing' ? 'Volver a mis reportes' : role === 'admissions' ? 'Volver a mis alertas' : 'Volver a la bandeja'
 
   async function applyAction(action: 'acknowledge' | 'resolve') {
     if (pending || savingDiagnosis) return
@@ -64,7 +65,7 @@ function IncidentView({ initial, role, endpoint }: { initial: Incident; role: Us
   }
 
   return <>
-    <Link to={backPath} className="mb-5 inline-flex items-center gap-2 text-sm font-medium text-accent hover:underline"><ArrowLeft size={16} />Volver a la bandeja</Link>
+    <Link to={backPath} className="mb-5 inline-flex items-center gap-2 text-sm font-medium text-accent hover:underline"><ArrowLeft size={16} />{backLabel}</Link>
     <PageTitle title={incident.title} description={`Registrado ${new Date(incident.createdAt).toLocaleString('es-PE')} por ${incident.reportedBy}`} action={<div className="flex items-center gap-2"><PriorityBadge priority={incident.priority} /><StatusBadge status={incident.status} /></div>} />
     <div className="grid gap-5 xl:grid-cols-[minmax(0,1.7fr)_minmax(280px,0.8fr)]">
       <div className="space-y-5"><Card className="p-5 sm:p-6"><h2 className="border-b border-line pb-3 font-semibold">Información del reporte</h2><dl className="mt-4 grid gap-x-8 gap-y-5 sm:grid-cols-2"><div className="sm:col-span-2"><dt className="text-xs text-muted">Descripción</dt><dd className="mt-1 text-sm leading-6">{incident.description}</dd></div><div><dt className="text-xs text-muted">ID del incidente</dt><dd className="mt-1 font-mono text-sm">{incident.id}</dd></div><div><dt className="text-xs text-muted">Área responsable</dt><dd className="mt-1 text-sm">{incident.area}</dd></div><div><dt className="text-xs text-muted">Síntoma reportado</dt><dd className="mt-1 text-sm">{incident.symptom ?? 'No especificado'}</dd></div><div><dt className="text-xs text-muted">Ubicación exacta</dt><dd className="mt-1 flex items-center gap-1.5 text-sm"><MapPin size={15} className="text-accent" />{incident.location}</dd></div>{incident.stationId && <><div><dt className="text-xs text-muted">Estación</dt><dd className="mt-1 text-sm">{incident.stationId}</dd></div>{incident.ip && <div><dt className="text-xs text-muted">Dirección IP</dt><dd className="mt-1 font-mono text-sm">{incident.ip}</dd></div>}</>}{incident.incidentType && <div><dt className="text-xs text-muted">{incident.kind === 'tecnico' ? 'Tipo de problema' : 'Tipo de falla'}</dt><dd className="mt-1 text-sm">{incident.incidentType}</dd></div>}</dl></Card>

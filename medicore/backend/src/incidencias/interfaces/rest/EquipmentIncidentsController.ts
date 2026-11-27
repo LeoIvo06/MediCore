@@ -32,6 +32,10 @@ export function createEquipmentIncidentsController(
     response.json((await queries.listBiomedical()).map(toEquipmentIncidentResource))
   })
 
+  router.get('/equipos/mis-reportes', requireRole('nursing'), async (_request, response) => {
+    response.json((await queries.listForReporter(response.locals.principal)).map(toEquipmentIncidentResource))
+  })
+
   router.get<{ id: string }>('/equipos/:id', requireRole('nursing', 'biomedical'), async (request, response) => {
     const number = equipmentNumber(request.params.id)
     const result = number === null ? { status: 'missing' as const } : await queries.find(number, response.locals.principal)

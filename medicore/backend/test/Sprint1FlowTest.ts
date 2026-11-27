@@ -122,6 +122,21 @@ test('Sprint 1: las siete historias se ejercitan por HTTP y los datos sobreviven
     await request('/referencias/equipos/ausente', 404, biomedical)
   })
 
+  await t.test('el resumen de Enfermería devuelve solo los reportes del usuario autenticado', async () => {
+    const ownReports = equipmentPath + '/mis-reportes'
+    await request(ownReports, 401)
+    await request(ownReports, 403, biomedical)
+    await request(ownReports, 403, support)
+    await request(equipmentPath, 403, nursing)
+    assert.deepEqual((await request<Ticket[]>(ownReports, 200, nursing)).map(({ id }) => id), [equipmentId])
+
+    const nurse = await server.prisma.demoUser.findUniqueOrThrow({ where: { id: 'enfermeria' } })
+    await server.prisma.demoUser.create({ data: { ...nurse, id: 'enfermeria-alterna', name: 'Enfermería alterna' } })
+    const alternate = await login('enfermeria-alterna', 'medicore-demo-cm')
+    assert.deepEqual(await request(ownReports, 200, alternate), [])
+    await request(equipmentPath + '/' + equipmentId, 403, alternate)
+  })
+
   await t.test('HU-JR1, HU-TI1 y HU-TI5: alerta crítica, acceso técnico y primer acuse', async () => {
     for (const [stationId, fields] of [
       ['ADM-02', ['ip']], ['ADM-03', ['location']], ['ADM-04', ['location', 'ip']],

@@ -19,6 +19,7 @@ Envía `Authorization: Bearer <token>` en las rutas protegidas. `401` indica cre
 | --- | --- | --- |
 | `POST /incidencias/equipos` | Enfermería | `201` con el incidente creado. `422` con `fields` para IDs vacíos o inválidos. |
 | `GET /incidencias/equipos` | Ingeniería Biomédica | Bandeja con los incidentes registrados en PostgreSQL. |
+| `GET /incidencias/equipos/mis-reportes` | Enfermería | Reportes del usuario autenticado para su Centro de control. |
 | `GET /incidencias/equipos/:id` | Ingeniería Biomédica o quien envió el reporte | Detalle del incidente identificado como `INC-EQ-…`. |
 
 El registro recibe `equipmentId`, `locationId` y `symptomId`. Express obtiene el reportante de la sesión. La ficha se consulta por el `equipmentId` devuelto por el incidente.

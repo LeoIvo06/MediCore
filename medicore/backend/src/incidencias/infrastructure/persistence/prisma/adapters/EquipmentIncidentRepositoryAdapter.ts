@@ -31,8 +31,9 @@ export class EquipmentIncidentRepositoryAdapter implements EquipmentIncidentRepo
     return this.prisma.equipmentIncident.findUnique({ where: { number } })
   }
 
-  list() {
+  list(reporterId?: string) {
     return this.prisma.equipmentIncident.findMany({
+      where: reporterId === undefined ? undefined : { reporterId },
       orderBy: [{ createdAt: 'desc' }, { number: 'desc' }],
     })
   }

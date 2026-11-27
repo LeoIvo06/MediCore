@@ -26,7 +26,7 @@ Actualizado el 27 de noviembre de 2026. Usar este registro junto con el prompt m
 | 02 · Marca y entrada | Media · APROBADA | Isotipo común y presentación breve, repetible desde Perfil demo. |
 | 03 · Landing | NO NECESARIA | Retirada por decisión del usuario. La demo abre directamente. |
 | 04–05 · Acceso y navegación | Según demo · PENDIENTE | Priorizar el acceso existente por perfil. El login público queda fuera de la exposición actual. |
-| 06 · Control Center | Alta · EN VALIDACIÓN | Inicio y accesos rápidos existentes. Definir métricas autorizadas a partir de datos reales. |
+| 06 · Control Center | Alta · EN VALIDACIÓN | Indicadores, actividad, distribución y acciones ajustadas a los cinco perfiles. |
 | 07A–C · Incidencias | Alta · PENDIENTE | Formularios, bandejas y detalle existentes. Alinear filtro y planificar avances del Sprint 2. |
 | 07D · Kanban | Baja · PENDIENTE | Opcional. Depende de transiciones acordadas. |
 | 08–11 · Módulos, movimiento, accesibilidad y responsive | Media · PENDIENTE | Ficha y tema ya operativos. Revisar por módulo después de la validación visual. |
@@ -74,6 +74,7 @@ Retirada por decisión del usuario. La aplicación abre en el dominio raíz y co
 
 La entrega se centra en las siete historias del Sprint 1 y en mejoras demostrables del prompt maestro. HU-TI3 se conserva como extra opcional de la demo. HU-MD2, HU-CM2 y HU-JUR3 quedan fuera del alcance de esta presentación.
 
-- **Centro de control · Fase 06, EN VALIDACIÓN.** Accesos por perfil, indicadores y actividad reciente en el inicio. Admisión y las áreas resolutoras consultan sus rutas autorizadas. Enfermería conserva el acceso de registro. Los totales se derivan de los registros obtenidos en cada sesión, sin métricas simuladas.
+- **Centro de control · Fase 06, EN VALIDACIÓN.** Accesos por perfil, indicadores y actividad reciente en el inicio. Cada perfil consulta sus rutas autorizadas. Enfermería conserva el registro y suma un resumen de sus propios reportes. Los totales se derivan de los registros obtenidos en cada sesión, sin métricas simuladas.
 - **Exportación CSV · Fase 12C, EN VALIDACIÓN.** La bandeja genera un archivo UTF-8 con las filas visibles tras aplicar los filtros. La exportación opera sobre el resultado autorizado ya cargado. Pruebas en Edge confirmaron actualización, cambio de perfil, filtros, descarga y neutralización de fórmulas. El build y las nueve pruebas de dominio y arquitectura pasaron.
 - **Verificación en Vercel.** Edge contrastó los totales con la respuesta de la API y comprobó la actualización, el cambio entre los cinco perfiles, el registro y la descarga filtrada. [Despliegue](https://vercel.com/carlos-071e/medicore-demo/BwvgxXocNawTQoDhRymiU2yY3ULC)
+- **Centros por perfil.** Enfermería consulta reportes propios por identidad de sesión. Admisión revisa alertas enviadas y acuses. Biomédica ve casos y equipos afectados. TI ve alertas críticas y pendientes de acuse. Servicios Generales ve sus casos por piso. Cada panel enlaza al detalle y agrupa los casos abiertos. La prueba de arquitectura y nueve resultados de integración en Docker pasaron, incluida la denegación a otra cuenta de Enfermería. Se reutiliza el repositorio de Incidencias y el esquema existente.

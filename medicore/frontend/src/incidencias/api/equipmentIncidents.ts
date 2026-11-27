@@ -10,6 +10,7 @@ export interface ReportOptions {
 
 export const reportOptionsPath = '/incidencias/opciones-reporte'
 export const equipmentIncidentsPath = '/incidencias/equipos'
+export const myEquipmentReportsPath = `${equipmentIncidentsPath}/mis-reportes`
 
 export function registerEquipmentIncident(input: { equipmentId: string; locationId: string; symptomId: string }) {
   return demoApi<Incident>('nursing', equipmentIncidentsPath, {

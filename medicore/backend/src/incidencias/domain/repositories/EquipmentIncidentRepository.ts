@@ -4,5 +4,5 @@ export interface EquipmentIncidentRepository {
   resolve(number: number): Promise<EquipmentIncident | null>
   create(draft: EquipmentIncidentDraft): Promise<EquipmentIncident>
   findByNumber(number: number): Promise<EquipmentIncident | null>
-  list(): Promise<EquipmentIncident[]>
+  list(reporterId?: string): Promise<EquipmentIncident[]>
 }

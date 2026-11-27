@@ -10,6 +10,10 @@ export class EquipmentIncidentQueryService {
     return this.incidents.list()
   }
 
+  listForReporter(actor: DemoPrincipal) {
+    return this.incidents.list(actor.id)
+  }
+
   async find(number: number, actor: DemoPrincipal) {
     const incident = await this.incidents.findByNumber(number)
     if (!incident) return { status: 'missing' as const }
