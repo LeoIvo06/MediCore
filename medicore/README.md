@@ -1,29 +1,48 @@
-# MediCore
+# MediCore · Sprint 1
 
-Aplicación web para el incremento del Sprint 1 del proyecto MediCore. El repositorio queda organizado como monorepo con frontend React y un backend Express organizado con DDD.
+Demo funcional con React, Express, Prisma y PostgreSQL en Docker. La interfaz usa perfiles ficticios para recorrer las siete historias del sprint.
 
-## Alcance del frontend inicial
+## Arrancar la demo
 
-- HU-CM1: registro de falla de equipo médico con equipo, ubicación y síntoma obligatorios.
-- HU-JR1: alerta rápida a TI desde una estación con ubicación e IP, prioridad crítica y validación de los datos de referencia.
-- HU-JUR1: bandejas filtrables, ordenadas por piso y prioridad.
-- HU-JUR2 / HU-TI1: consulta del detalle del incidente y comprobación de acceso por perfil/área en la interfaz.
-- HU-MD1: apertura de ficha técnica e historial de mantenimiento desde el incidente relacionado.
-- HU-TI5: confirmación de recepción de alerta con fecha y hora idempotentes.
+Abre Docker Desktop. Usa Node.js 22.12 o posterior dentro de la rama 22, o Node.js 24. Desde esta carpeta (`medicore`), abre dos terminales PowerShell.
 
-## Ejecutar el frontend
-
-Requiere Node.js y npm. Desde `frontend/`:
+**Terminal 1 · API y base de datos**
 
 ```powershell
-npm install
-npm run dev
+Set-Location backend
+if (!(Test-Path .env)) { Copy-Item .env.example .env }
+docker compose up -d --wait
+npm.cmd ci
+npm.cmd run db:migrate
+npm.cmd run generate
+npm.cmd run db:seed
+npm.cmd run dev
 ```
 
-Para generar la versión de producción: `npm run build`. El proyecto fue creado con Vite, React, TypeScript, React Router, Tailwind CSS y Lucide.
+**Terminal 2 · Interfaz**
 
-## Estado de integración
+```powershell
+Set-Location frontend
+npm.cmd ci
+npm.cmd run dev
+```
 
-El reporte de equipos, la bandeja de Biomédica y la ficha técnica usan la [API de Express con Prisma y PostgreSQL en Docker](backend/README.md). Las alertas de Admisión, la bandeja de Soporte TI y el acuse también se guardan en PostgreSQL. La bandeja y el detalle de Servicios Generales también consultan PostgreSQL. El navegador guarda la selección de perfil de demo.
+Abre la URL de Vite, normalmente `http://127.0.0.1:5173`. La API está disponible en `http://127.0.0.1:3001/api/health`.
 
-Perfiles de prueba: Enfermería, Admisión, Servicios Generales, Soporte TI e Ingeniería Biomédica. Los datos son ficticios.
+## Guion de la demo
+
+| Recorrido | Qué mostrar |
+| --- | --- |
+| Enfermería → Ingeniería Biomédica (`HU-CM1`, `HU-MD1`) | Envía solo la ubicación y verifica que la selección se conserva. Completa con el monitor, envía y abre el mismo ID desde Biomédica. Muestra la ficha y el historial del activo. |
+| Admisión → Soporte TI → Admisión (`HU-JR1`, `HU-TI1`, `HU-TI5`) | Prueba `ADM-02`, `ADM-03` y `ADM-04` y comprueba los rechazos. Envía con `ADM-01`. Abre el ID como TI, comprueba el tipo, síntoma, ubicación e IP y confirma dos veces. Vuelve a Admisión para verificar la primera hora. |
+| Servicios Generales (`HU-JUR1`, `HU-JUR2`) | Revisa los activos de los pisos 1 y 3. En el piso 3 deben aparecer `0140`, `0141` y `0143` en ese orden. Abre `INC-2026-0141` para mostrar el tipo, la ubicación y el síntoma. Cambia a Soporte TI desde el detalle para ver la denegación. |
+
+Usa **Perfil demo** para cambiar de rol. Los incidentes y acuses se guardan en PostgreSQL. En el navegador solo se conserva el perfil seleccionado.
+
+Para la explicación técnica, sigue el registro de un reporte desde su controlador REST y el servicio de comandos hasta la fachada de Referencias Operativas y el adaptador Prisma de Incidencias.
+
+## Pruebas técnicas
+
+Desde `backend`, `npm.cmd test` ejecuta las pruebas de dominio y arquitectura. `npm.cmd run test:integration` ejecuta los recorridos HTTP y comprueba la persistencia al recrear un contenedor de PostgreSQL con un volumen temporal. Abre [demo.http](backend/demo.http) en VS Code con REST Client para repetir las peticiones en vivo.
+
+Consulta la [estructura del backend](backend/README.md) y el [contrato de la API](docs/api/README.md).

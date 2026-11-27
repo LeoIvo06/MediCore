@@ -1,0 +1,183 @@
+import assert from 'node:assert/strict'
+import { execFileSync } from 'node:child_process'
+import { once } from 'node:events'
+import { test } from 'node:test'
+import type { AddressInfo } from 'node:net'
+import { createApp } from '../src/app.js'
+import { createPrismaClient } from '../src/shared/infrastructure/persistence/prisma/client.js'
+
+function composeArgs(project: string) {
+  return ['compose', '--project-name', project, '--env-file', '.env.example']
+}
+
+test('Sprint 1: las siete historias se ejercitan por HTTP y los datos sobreviven al reinicio', { timeout: 120_000 }, async (t) => {
+  const project = process.env.MEDICORE_TEST_COMPOSE_PROJECT
+  const database = process.env.DATABASE_URL
+  assert.match(project ?? '', /^medicore-sprint1-[a-f0-9]{8}$/)
+  assert.ok(database && project, 'Ejecuta npm run test:integration.')
+  const testAddress = execFileSync('docker', [...composeArgs(project), 'port', 'postgres', '5432'], { encoding: 'utf8' }).trim()
+  assert.equal(new URL(database).host, testAddress)
+
+  const start = async (url: string) => {
+    let closed = false
+    const prisma = createPrismaClient(url)
+    const server = createApp(prisma).listen(0, '127.0.0.1')
+    await once(server, 'listening')
+    return {
+      api: `http://127.0.0.1:${(server.address() as AddressInfo).port}/api`,
+      prisma,
+      async close() {
+        if (closed) return
+        closed = true
+        try {
+          await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()))
+        } finally {
+          await prisma.$disconnect()
+        }
+      },
+    }
+  }
+
+  let server = await start(database)
+  t.after(async () => { await server.close() })
+  async function request<T>(path: string, status: number, token?: string, method = 'GET', body?: unknown): Promise<T> {
+    const headers = new Headers()
+    if (token) headers.set('Authorization', `Bearer ${token}`)
+    if (body !== undefined) headers.set('Content-Type', 'application/json')
+    const response = await fetch(server.api + path, {
+      method, headers, body: body === undefined ? undefined : JSON.stringify(body), signal: AbortSignal.timeout(8_000),
+    })
+    assert.equal(response.status, status, `${method} ${path}`)
+    return response.json() as Promise<T>
+  }
+
+  async function login(userId: string, password: string) {
+    return (await request<{ token: string }>('/sesiones-demo', 201, undefined, 'POST', { userId, password })).token
+  }
+
+  type Ticket = {
+    id: string
+    equipmentId?: string
+    location: string
+    symptom: string
+    incidentType?: string
+    priority: string
+    ip?: string
+    acknowledgedAt?: string
+    open?: boolean
+  }
+  const equipmentPath = '/incidencias/equipos'
+  const alertPath = '/alertas-ti'
+  const itPath = '/soporte-ti/alertas'
+  const generalPath = '/servicios-generales/incidencias'
+  const nursing = await login('enfermeria', 'medicore-demo-cm')
+  const biomedical = await login('biomedica', 'medicore-demo-md')
+  const admissions = await login('admision', 'medicore-demo-jr')
+  const support = await login('soporte-ti', 'medicore-demo-ds')
+  const general = await login('servicios-generales', 'medicore-demo-sg')
+  let equipmentId = ''
+  let alertId = ''
+  let acknowledgedAt: string | undefined
+
+  await t.test('HU-CM1 y HU-MD1: se valida el reporte y se abre el historial del equipo asociado', async () => {
+    const health = await request<{ database: string }>('/health', 200)
+    assert.equal(health.database, 'connected')
+    await request('/incidencias/opciones-reporte', 401)
+    await request('/incidencias/opciones-reporte', 403, admissions)
+    await request('/incidencias/opciones-reporte', 200, nursing)
+    const incomplete = await request<{ fields: string[] }>(equipmentPath, 422, nursing, 'POST', { locationId: 'emergencia-1' })
+    assert.deepEqual(incomplete.fields, ['equipmentId', 'symptomId'])
+    assert.deepEqual(await request(equipmentPath, 200, biomedical), [])
+
+    const report = await request<Ticket>(equipmentPath, 201, nursing, 'POST', {
+      equipmentId: 'eq-monitor-04567', locationId: 'emergencia-1', symptomId: 'no-enciende',
+    })
+    equipmentId = report.id
+    assert.match(equipmentId, /^INC-EQ-\d+$/)
+    const list = await request<Ticket[]>(equipmentPath, 200, biomedical)
+    assert.deepEqual(list.map(({ id }) => id), [equipmentId])
+    const detail = await request<Ticket>(`${equipmentPath}/${equipmentId}`, 200, biomedical)
+    assert.equal(detail.equipmentId, 'eq-monitor-04567')
+    await request(`${equipmentPath}/${equipmentId}`, 403, support)
+    const asset = await request<{ id: string; maintenance: { id: string }[] }>(`/referencias/equipos/${detail.equipmentId}`, 200, biomedical)
+    assert.equal(asset.id, detail.equipmentId)
+    assert.deepEqual(asset.maintenance.map(({ id }) => id), ['mtto-monitor-1'])
+    await request('/referencias/equipos/ausente', 404, biomedical)
+  })
+
+  await t.test('HU-JR1, HU-TI1 y HU-TI5: alerta crítica, acceso técnico y primer acuse', async () => {
+    for (const [stationId, fields] of [
+      ['ADM-02', ['ip']], ['ADM-03', ['location']], ['ADM-04', ['location', 'ip']],
+    ] as const) {
+      const result = await request<{ fields: string[] }>(alertPath, 422, admissions, 'POST', { stationId })
+      assert.deepEqual(result.fields, fields)
+    }
+    assert.deepEqual(await request(itPath, 200, support), [])
+
+    const alert = await request<Ticket>(alertPath, 201, admissions, 'POST', { stationId: 'ADM-01' })
+    alertId = alert.id
+    assert.equal(alert.priority, 'Crítica')
+    const inbox = await request<Ticket[]>(itPath, 200, support)
+    assert.deepEqual(inbox.map(({ id }) => id), [alertId])
+
+    const path = `${alertPath}/${alertId}`
+    const detail = await request<Ticket>(path, 200, support)
+    assert.equal(detail.ip, '10.20.1.41')
+    assert.equal(detail.location, 'Módulo de Admisión · Planta 1')
+    assert.equal(detail.symptom, 'Estación bloqueada')
+    assert.equal(detail.incidentType, 'Bloqueo de estación')
+    await request(path, 403, general)
+    await request(`${path}/acuse`, 403, admissions, 'PUT')
+
+    const other = await server.prisma.demoUser.findUniqueOrThrow({ where: { id: 'admision' } })
+    await server.prisma.demoUser.create({ data: { ...other, id: 'admision-alterna', name: 'Admisión alterna' } })
+    const alternate = await login('admision-alterna', 'medicore-demo-jr')
+    await request(path, 403, alternate)
+    const results = await Promise.all(Array.from({ length: 4 }, () => request<Ticket>(`${path}/acuse`, 200, support, 'PUT')))
+    acknowledgedAt = results[0].acknowledgedAt
+    assert.ok(acknowledgedAt)
+    for (const result of results) {
+      assert.equal(result.acknowledgedAt, acknowledgedAt)
+      assert.equal(result.open, true)
+    }
+    assert.equal((await request<Ticket>(path, 200, admissions)).acknowledgedAt, acknowledgedAt)
+    await request(path, 403, alternate)
+
+    const legacy = await server.prisma.iTAlert.create({ data: {
+      stationId: 'ADM-02', location: detail.location, floor: 1, reporterId: 'admision', reporterName: 'Jorge Ramírez',
+    } })
+    const legacyId = `INC-TI-${String(legacy.number).padStart(6, '0')}`
+    assert.equal((await request<Ticket>(`${alertPath}/${legacyId}`, 200, support)).ip, undefined)
+  })
+
+  await t.test('HU-JUR1 y HU-JUR2: agrupa, prioriza y permite consultar el detalle técnico', async () => {
+    const groups = await request<{ floor: number; incidents: Ticket[] }[]>(generalPath, 200, general)
+    assert.deepEqual(groups.map(({ floor, incidents }) => [floor, incidents.map(({ id }) => id)]), [
+      [1, ['INC-2026-0139']], [3, ['INC-2026-0140', 'INC-2026-0141', 'INC-2026-0143']],
+    ])
+    const path = `${generalPath}/INC-2026-0141`
+    const detail = await request<Ticket>(path, 200, general)
+    assert.equal(detail.id, 'INC-2026-0141')
+    assert.equal(detail.incidentType, 'Equipo de oficina')
+    assert.equal(detail.location, 'Laboratorio · Estación de impresión 1')
+    assert.equal(detail.symptom, 'Trabajos de impresión en espera')
+    await request(path, 403, support)
+  })
+
+  await t.test('el mismo reporte y el primer acuse sobreviven a la recreación de PostgreSQL', async () => {
+    await server.close()
+    const args = composeArgs(project)
+    execFileSync('docker', [...args, 'up', '-d', '--force-recreate', '--wait'], { stdio: 'inherit' })
+    const address = execFileSync('docker', [...args, 'port', 'postgres', '5432'], { encoding: 'utf8' }).trim()
+    assert.match(address, /^127\.0\.0\.1:[1-9]\d+$/)
+    const url = new URL(database)
+    url.host = address
+    server = await start(url.href)
+    const biomedical = await login('biomedica', 'medicore-demo-md')
+    const reporter = await login('admision', 'medicore-demo-jr')
+    await request(`${equipmentPath}/${equipmentId}`, 200, biomedical)
+    const alert = await request<Ticket>(`${alertPath}/${alertId}`, 200, reporter)
+    assert.equal(alert.acknowledgedAt, acknowledgedAt)
+    assert.equal(alert.open, true)
+  })
+})

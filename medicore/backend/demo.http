@@ -1,28 +1,25 @@
-# Bloque 2 · Ejecuta los inicios de sesión y copia cada token debajo.
+# Sprint 1 · VS Code REST Client. Ejecuta los inicios de sesión y los registros antes de consultar sus respuestas.
 @host = http://127.0.0.1:3001
-@enfermeriaToken = PEGA_EL_TOKEN_DE_ENFERMERIA
-@admisionToken = PEGA_EL_TOKEN_DE_ADMISION
-@biomedicaToken = PEGA_EL_TOKEN_DE_BIOMEDICA
-@soporteToken = PEGA_EL_TOKEN_DE_SOPORTE_TI
-@serviciosToken = PEGA_EL_TOKEN_DE_SERVICIOS_GENERALES
-@alertId = PEGA_EL_ID_DE_LA_ALERTA
 
 ### Estado de la API y PostgreSQL · 200
 GET {{host}}/api/health
 
 ### Sesión de Enfermería · 201
+# @name loginNursing
 POST {{host}}/api/sesiones-demo
 Content-Type: application/json
 
 { "userId": "enfermeria", "password": "medicore-demo-cm" }
 
 ### Sesión de Admisión · 201
+# @name loginAdmissions
 POST {{host}}/api/sesiones-demo
 Content-Type: application/json
 
 { "userId": "admision", "password": "medicore-demo-jr" }
 
 ### Sesión de Biomédica · 201
+# @name loginBiomedical
 POST {{host}}/api/sesiones-demo
 Content-Type: application/json
 
@@ -30,50 +27,56 @@ Content-Type: application/json
 
 ### Opciones que Incidencias consulta por la fachada de Referencias Operativas · 200
 GET {{host}}/api/incidencias/opciones-reporte
-Authorization: Bearer {{enfermeriaToken}}
+Authorization: Bearer {{loginNursing.response.body.$.token}}
 
 ### Opciones sin sesión · 401
 GET {{host}}/api/incidencias/opciones-reporte
 
 ### Opciones con perfil de Admisión · 403
 GET {{host}}/api/incidencias/opciones-reporte
-Authorization: Bearer {{admisionToken}}
+Authorization: Bearer {{loginAdmissions.response.body.$.token}}
 
 ### Estación completa · 200
 GET {{host}}/api/referencias/estaciones/ADM-01
-Authorization: Bearer {{admisionToken}}
+Authorization: Bearer {{loginAdmissions.response.body.$.token}}
 
 ### Estación sin IP ni ubicación · 200 con ambas propiedades null
 GET {{host}}/api/referencias/estaciones/ADM-04
-Authorization: Bearer {{admisionToken}}
+Authorization: Bearer {{loginAdmissions.response.body.$.token}}
 
 ### Ficha e historial del equipo · 200
 GET {{host}}/api/referencias/equipos/eq-vent-00123
-Authorization: Bearer {{biomedicaToken}}
+Authorization: Bearer {{loginBiomedical.response.body.$.token}}
 
 ### Equipo inexistente · 404
 GET {{host}}/api/referencias/equipos/no-existe
-Authorization: Bearer {{biomedicaToken}}
+Authorization: Bearer {{loginBiomedical.response.body.$.token}}
 
 ### Reporte incompleto · 422
 POST {{host}}/api/incidencias/equipos
-Authorization: Bearer {{enfermeriaToken}}
+Authorization: Bearer {{loginNursing.response.body.$.token}}
 Content-Type: application/json
 
 { "locationId": "uci-3" }
 
 ### Registrar reporte · 201
+# @name equipmentReport
 POST {{host}}/api/incidencias/equipos
-Authorization: Bearer {{enfermeriaToken}}
+Authorization: Bearer {{loginNursing.response.body.$.token}}
 Content-Type: application/json
 
 { "equipmentId": "eq-vent-00123", "locationId": "uci-3", "symptomId": "no-enciende" }
 
 ### Bandeja biomédica · 200
 GET {{host}}/api/incidencias/equipos
-Authorization: Bearer {{biomedicaToken}}
+Authorization: Bearer {{loginBiomedical.response.body.$.token}}
+
+### Detalle del mismo reporte biomédico · 200
+GET {{host}}/api/incidencias/equipos/{{equipmentReport.response.body.$.id}}
+Authorization: Bearer {{loginBiomedical.response.body.$.token}}
 
 ### Iniciar sesión como Soporte TI · 201
+# @name loginSupport
 POST {{host}}/api/sesiones-demo
 Content-Type: application/json
 
@@ -81,39 +84,41 @@ Content-Type: application/json
 
 ### Alertar desde estación con datos faltantes · 422
 POST {{host}}/api/alertas-ti
-Authorization: Bearer {{admisionToken}}
+Authorization: Bearer {{loginAdmissions.response.body.$.token}}
 Content-Type: application/json
 
 { "stationId": "ADM-04" }
 
-### Enviar alerta crítica y copiar su id en alertId · 201
+### Enviar alerta crítica · 201
+# @name itAlert
 POST {{host}}/api/alertas-ti
-Authorization: Bearer {{admisionToken}}
+Authorization: Bearer {{loginAdmissions.response.body.$.token}}
 Content-Type: application/json
 
 { "stationId": "ADM-01" }
 
 ### Bandeja de Soporte TI · 200
 GET {{host}}/api/soporte-ti/alertas
-Authorization: Bearer {{soporteToken}}
+Authorization: Bearer {{loginSupport.response.body.$.token}}
 
 ### Detalle técnico · 200
-GET {{host}}/api/alertas-ti/{{alertId}}
-Authorization: Bearer {{soporteToken}}
+GET {{host}}/api/alertas-ti/{{itAlert.response.body.$.id}}
+Authorization: Bearer {{loginSupport.response.body.$.token}}
 
 ### Confirmar recepción dos veces · 200 con el mismo acknowledgedAt
-PUT {{host}}/api/alertas-ti/{{alertId}}/acuse
-Authorization: Bearer {{soporteToken}}
+PUT {{host}}/api/alertas-ti/{{itAlert.response.body.$.id}}/acuse
+Authorization: Bearer {{loginSupport.response.body.$.token}}
 
 ### Consultar el acuse como reportante · 200
-GET {{host}}/api/alertas-ti/{{alertId}}
-Authorization: Bearer {{admisionToken}}
+GET {{host}}/api/alertas-ti/{{itAlert.response.body.$.id}}
+Authorization: Bearer {{loginAdmissions.response.body.$.token}}
 
 ### Consultar el acuse con un perfil ajeno · 403
-GET {{host}}/api/alertas-ti/{{alertId}}
-Authorization: Bearer {{biomedicaToken}}
+GET {{host}}/api/alertas-ti/{{itAlert.response.body.$.id}}
+Authorization: Bearer {{loginBiomedical.response.body.$.token}}
 
 ### Iniciar sesión como Servicios Generales · 201
+# @name loginGeneralServices
 POST {{host}}/api/sesiones-demo
 Content-Type: application/json
 
@@ -121,15 +126,15 @@ Content-Type: application/json
 
 ### Incidentes activos por piso · 200
 GET {{host}}/api/servicios-generales/incidencias
-Authorization: Bearer {{serviciosToken}}
+Authorization: Bearer {{loginGeneralServices.response.body.$.token}}
 
 ### Detalle técnico · 200
 GET {{host}}/api/servicios-generales/incidencias/INC-2026-0141
-Authorization: Bearer {{serviciosToken}}
+Authorization: Bearer {{loginGeneralServices.response.body.$.token}}
 
 ### Bandeja sin sesión · 401
 GET {{host}}/api/servicios-generales/incidencias
 
 ### Detalle técnico con perfil ajeno · 403
 GET {{host}}/api/servicios-generales/incidencias/INC-2026-0141
-Authorization: Bearer {{soporteToken}}
+Authorization: Bearer {{loginSupport.response.body.$.token}}

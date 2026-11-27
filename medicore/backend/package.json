@@ -15,6 +15,7 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/server.js",
     "test": "tsx --test test/ArchitectureTest.ts test/IncidentAccessPolicyTest.ts test/EquipmentIncidentCommandServiceTest.ts test/ITAlertCommandServiceTest.ts test/GeneralServicesInboxPolicyTest.ts",
+    "test:integration": "node scripts/test-sprint1.mjs",
     "db:migrate": "prisma migrate deploy",
     "db:status": "prisma migrate status",
     "db:seed": "prisma db seed"

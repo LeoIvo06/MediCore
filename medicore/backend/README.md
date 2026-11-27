@@ -12,6 +12,8 @@ if (!(Test-Path .env)) { Copy-Item .env.example .env }
 docker compose up -d --wait
 npm.cmd ci
 npm.cmd run db:migrate
+npm.cmd run generate
+npm.cmd run db:seed
 npm.cmd run dev
 ```
 
@@ -35,16 +37,6 @@ Como en ULima Market, cada bounded context se organiza por capas dentro de su pr
 
 ## Referencias Operativas y sesiones de demo
 
-Con la base activa, aplica la migración, genera el cliente y carga los datos ficticios:
-
-```powershell
-npm.cmd run db:migrate
-npm.cmd run generate
-npm.cmd run db:seed
-npm.cmd test
-npm.cmd run dev
-```
-
 El seed se puede repetir y conserva los registros existentes. Las cuentas de prueba son ficticias y las sesiones duran una hora en la instancia de Express.
 
 | Usuario | Perfil | Contraseña de demo |
@@ -59,24 +51,8 @@ Usa [demo.http](demo.http) para iniciar sesión y probar los catálogos, las est
 
 Incidencias usa `ExternalOperationalReferencesService` desde `application/internal/outboundservices/acl` y Referencias Operativas publica `OperationalReferencesContextFacade` en `interfaces/acl`. La prueba `ArchitectureTest` verifica este límite, la dirección de la dependencia y la separación de Prisma respecto del dominio.
 
-## Reporte de equipo y ficha biomédica
+## Validación del Sprint 1
 
-Aplica las migraciones y carga los datos ficticios con los comandos anteriores. En otra terminal, desde `medicore/frontend`, ejecuta `npm.cmd ci` y `npm.cmd run dev`. Vite reenvía las peticiones `/api` al backend de desarrollo.
+El [README de MediCore](../README.md) contiene el arranque y el orden de la exposición. En VS Code con REST Client, ejecuta [demo.http](demo.http) de arriba abajo. Las peticiones nombradas proporcionan los tokens y los IDs a las siguientes peticiones mediante sus respuestas.
 
-1. En **Perfil demo**, elige **Enfermería** y abre **Reportar falla**. Selecciona solo una ubicación y envía. Debes ver los campos faltantes y conservar la ubicación.
-2. Completa el equipo y el síntoma, envía y anota el identificador `INC-EQ-…`.
-3. Cambia a **Ingeniería Biomédica**, abre **Bandeja biomédica** y busca ese ID. En el detalle, abre **Ficha técnica** y comprueba que el historial corresponde al equipo reportado.
-
-Las pantallas de este flujo inician la sesión de demo al consultar la API. Los datos de las incidencias de equipo se guardan en PostgreSQL. La bandeja y el detalle de Servicios Generales consultan PostgreSQL.
-
-## Alertas y acuses de TI
-
-1. Con la API y Vite activos, elige **Admisión** en **Perfil demo** y abre **Alerta rápida**. Intenta enviar con `ADM-02` (sin IP), `ADM-03` (sin ubicación) y `ADM-04` (sin ambos).
-2. Envía con `ADM-01`. Cambia a **Soporte TI**, abre **Lista de incidentes** y busca el mismo ID `INC-TI-…`. El detalle muestra el tipo de falla, la ubicación, el síntoma y la IP registrada.
-3. Pulsa **Confirmar recepción** y vuelve a pulsar el botón. Compara la fecha y hora y comprueba que el incidente sigue abierto. Vuelve a **Admisión** y abre el mismo ticket desde **Alertas enviadas** para ver su acuse.
-
-## Servicios Generales
-
-Aplica la migración y ejecuta el seed para disponer de los casos ficticios. En **Perfil demo → Servicios Generales → Lista de incidentes**, comprueba los grupos **Piso 1** y **Piso 3**. En el piso 3 aparecen `INC-2026-0140`, `INC-2026-0141` y `INC-2026-0143` en ese orden. El caso cerrado `INC-2026-0144` queda fuera de la bandeja.
-
-Abre `INC-2026-0141` y verifica su tipo de problema, ubicación y síntoma. Las peticiones de [demo.http](demo.http) permiten verificar el mismo recorrido y la respuesta por falta de permisos.
+Desde aquí, ejecuta `npm.cmd test` para probar las reglas y la arquitectura. Con Docker activo, `npm.cmd run test:integration` crea un proyecto temporal con puerto dinámico, aplica las migraciones, carga el seed y comprueba las siete historias por HTTP. También recrea su contenedor para verificar el mismo reporte y el primer acuse. Al terminar retira ese contenedor y su volumen.
