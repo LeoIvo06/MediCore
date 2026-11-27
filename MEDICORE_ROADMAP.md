@@ -22,8 +22,9 @@ Actualizado el 27 de noviembre de 2026. Usar este registro junto con el prompt m
 | Fase | Prioridad y estado | Entrega o dependencia |
 | --- | --- | --- |
 | 00 · Auditoría y arquitectura | Alta · EN VALIDACIÓN | Contraste con informe y ULima Market, respaldo y línea base reproducible. |
-| 01 · Sistema visual | Alta · EN VALIDACIÓN | Paleta, tipografía, espaciado, superficies, campos, botones, tablas y estados en los flujos existentes. Sin dependencias nuevas. |
-| 02–03 · Marca y landing | Media · PENDIENTE | Reusar logo y favicon. Evaluar Pulse y desarrollar landing por separado. |
+| 01 · Sistema visual | Alta · APROBADA | Paleta, tipografía, espaciado, superficies, campos, botones, tablas y estados en los flujos existentes. Sin dependencias nuevas. |
+| 02 · Marca y entrada | Media · EN DESARROLLO | Isotipo común y presentación breve, repetible desde Perfil demo. |
+| 03 · Landing | Media · PENDIENTE | Definir la página pública después de validar la marca. |
 | 04–05 · Acceso y navegación | Alta · PENDIENTE | Navegación por rol parcial. Diseñar acceso real o delimitar el modo demo antes de introducir login público. |
 | 06 · Control Center | Media · PENDIENTE | Inicio y accesos rápidos existentes. Definir métricas autorizadas a partir de datos reales. |
 | 07A–C · Incidencias | Alta · PENDIENTE | Formularios, bandejas y detalle existentes. Alinear filtro y planificar avances del Sprint 2. |
@@ -41,7 +42,7 @@ El prompt maestro guía el desarrollo. La autorización expresa del usuario defi
 
 ## Fase 01 · Entrega visual
 
-- **EN VALIDACIÓN.** Se actualizaron las variables de tema y los estilos compartidos de títulos, tarjetas, campos, botones, estados y tablas. Las pantallas de Inicio, Reportar falla, Alerta rápida, Bandeja y Detalle consumen las mismas clases. El logo, el favicon y el modo oscuro carbón siguen siendo los de MediCore.
+- **APROBADA.** El usuario validó la demo. Se actualizaron las variables de tema y los estilos compartidos de títulos, tarjetas, campos, botones, estados y tablas. Las pantallas de Inicio, Reportar falla, Alerta rápida, Bandeja y Detalle consumen las mismas clases. El logo, el favicon y el modo oscuro carbón siguen siendo los de MediCore.
 - **Decisión de diseño.** Priorizar la lectura y las acciones de trabajo. Formularios alineados con su título, controles de 44 px, acción primaria a todo el ancho en móvil, foco de teclado visible y transiciones que respetan movimiento reducido. Los modales y tooltips se incorporarán cuando un flujo los requiera.
 - **Verificación local.** Build de producción completo y lint sin errores, con dos avisos preexistentes en el contexto de React y el encabezado. Edge comprobó formulario con catálogos, bandeja con datos, claro/oscuro, foco y ausencia de desbordamiento global a 360, 390, 768, 1024 y 1440 px.
 - **Verificación en Vercel.** El commit 895c3f7 quedó publicado en el dominio actual. Edge verificó catálogos, campana, bandeja con datos, tema y foco. La ruta de salud confirmó PostgreSQL. La compilación informó avisos de auditoría de dependencias del backend. Revisar su alcance en la fase de estabilidad. [Despliegue verificado](https://vercel.com/carlos-071e/medicore-demo/85bfSoXCYLGVwHJD1iKbtDzME7wt)
