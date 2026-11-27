@@ -67,4 +67,10 @@ Aplica las migraciones y carga los datos ficticios con los comandos anteriores. 
 2. Completa el equipo y el síntoma, envía y anota el identificador `INC-EQ-…`.
 3. Cambia a **Ingeniería Biomédica**, abre **Bandeja biomédica** y busca ese ID. En el detalle, abre **Ficha técnica** y comprueba que el historial corresponde al equipo reportado.
 
-Las pantallas de este flujo inician la sesión de demo al consultar la API. Los datos de las incidencias de equipo se guardan en PostgreSQL. Los datos de alertas de TI y Servicios Generales siguen en el repositorio local de la interfaz.
+Las pantallas de este flujo inician la sesión de demo al consultar la API. Los datos de las incidencias de equipo se guardan en PostgreSQL. Los datos de Servicios Generales siguen en el repositorio local de la interfaz.
+
+## Alertas y acuses de TI
+
+1. Con la API y Vite activos, elige **Admisión** en **Perfil demo** y abre **Alerta rápida**. Intenta enviar con `ADM-02` (sin IP), `ADM-03` (sin ubicación) y `ADM-04` (sin ambos).
+2. Envía con `ADM-01`. Cambia a **Soporte TI**, abre **Lista de incidentes** y busca el mismo ID `INC-TI-…`. El detalle muestra el tipo de falla, la ubicación, el síntoma y la IP registrada.
+3. Pulsa **Confirmar recepción** y vuelve a pulsar el botón. Compara la fecha y hora y comprueba que el incidente sigue abierto. Vuelve a **Admisión** y abre el mismo ticket desde **Alertas enviadas** para ver su acuse.

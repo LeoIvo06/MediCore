@@ -1,12 +1,10 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { DemoState, UserRole } from '../../shared/types'
-import { acknowledgeAlert, createITAlert, loadDemoState, saveDemoState, setRole } from '../api/demoRepository'
+import { loadDemoState, saveDemoState, setRole } from '../api/demoRepository'
 
 interface IncidentContextValue {
   state: DemoState
   updateRole: (role: UserRole) => void
-  sendITAlert: (stationId: string) => ReturnType<typeof createITAlert>
-  confirmAlert: (incidentId: string) => void
 }
 const IncidentContext = createContext<IncidentContextValue | null>(null)
 
@@ -16,12 +14,6 @@ export function IncidentProvider({ children }: { children: ReactNode }) {
   const value = useMemo<IncidentContextValue>(() => ({
     state,
     updateRole: (role) => setState((current) => setRole(current, role)),
-    sendITAlert: (stationId) => {
-      const result = createITAlert(state, stationId)
-      if (result.incident) setState(result.state)
-      return result
-    },
-    confirmAlert: (id) => setState((current) => acknowledgeAlert(current, id)),
   }), [state])
   return <IncidentContext.Provider value={value}>{children}</IncidentContext.Provider>
 }

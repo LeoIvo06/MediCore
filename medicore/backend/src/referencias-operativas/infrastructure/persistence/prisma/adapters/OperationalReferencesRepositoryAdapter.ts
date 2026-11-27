@@ -27,6 +27,13 @@ export class OperationalReferencesRepositoryAdapter implements OperationalRefere
     })
   }
 
+  listStations() {
+    return this.prisma.operationalStation.findMany({
+      select: { id: true, label: true, location: true, floor: true, ip: true },
+      orderBy: { id: 'asc' },
+    })
+  }
+
   findStation(id: string) {
     return this.prisma.operationalStation.findUnique({
       where: { id },

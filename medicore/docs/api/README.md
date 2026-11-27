@@ -23,4 +23,17 @@ Envía `Authorization: Bearer <token>` en las rutas protegidas. `401` indica cre
 
 El registro recibe `equipmentId`, `locationId` y `symptomId`. Express obtiene el reportante de la sesión. La ficha se consulta por el `equipmentId` devuelto por el incidente.
 
-Los endpoints de alertas y Servicios Generales se implementan en los siguientes bloques.
+### Alertas de Admisión y Soporte TI
+
+| Método y ruta | Acceso | Respuesta |
+| --- | --- | --- |
+| `GET /referencias/estaciones` | Admisión | Estaciones disponibles. |
+| `POST /alertas-ti` | Admisión | `201` con la alerta crítica. `422` con `fields` si la estación no existe o carece de `location` o `ip`. |
+| `GET /alertas-ti` | Admisión | Alertas enviadas por el usuario autenticado. |
+| `GET /soporte-ti/alertas` | Soporte TI | Bandeja de alertas recibidas. |
+| `GET /alertas-ti/:id` | Soporte TI o quien envió la alerta | Detalle técnico y acuse si está confirmado. |
+| `PUT /alertas-ti/:id/acuse` | Soporte TI | `200` con el primer `acknowledgedAt`, incluso si se confirma otra vez. La alerta sigue abierta. |
+
+El envío recibe `stationId`. La ubicación y la IP se consultan por la fachada ACL, y el reportante proviene de la sesión. El detalle omite la IP cuando el ticket no la tiene registrada.
+
+Los endpoints de Servicios Generales se implementan en el bloque siguiente.

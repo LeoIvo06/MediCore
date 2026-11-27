@@ -8,6 +8,10 @@ export function createOperationalReferencesController(
 ) {
   const router = Router()
 
+  router.get('/estaciones', requireRole('admissions'), async (_request, response) => {
+    response.json(await queries.listStations())
+  })
+
   router.get<{ id: string }>('/estaciones/:id', requireRole('admissions'), async (request, response) => {
     const station = await queries.getStation(request.params.id)
     if (!station) {

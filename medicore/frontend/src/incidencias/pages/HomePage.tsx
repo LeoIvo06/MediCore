@@ -8,11 +8,9 @@ export default function HomePage() {
   const { state } = useIncidents()
   const role = state.activeRole
   const profile = roleLabels[role]
-  const localIncidents = state.incidents.filter((incident) => {
-    if (role === 'it-support') return incident.area === 'TI'
-    if (role === 'general-services') return incident.area === 'Servicios Generales'
-    return role === 'admissions' && incident.reportedBy === profile.name
-  })
+  const localIncidents = role === 'general-services'
+    ? state.incidents.filter((incident) => incident.area === 'Servicios Generales')
+    : []
   const shortcuts = role === 'nursing'
     ? [{ title: 'Reportar falla en equipo médico', text: 'Registra el equipo, la ubicación y el síntoma observado.', to: '/reportar-falla', Icon: PlusCircle }]
     : role === 'admissions'

@@ -3,6 +3,8 @@
 @enfermeriaToken = PEGA_EL_TOKEN_DE_ENFERMERIA
 @admisionToken = PEGA_EL_TOKEN_DE_ADMISION
 @biomedicaToken = PEGA_EL_TOKEN_DE_BIOMEDICA
+@soporteToken = PEGA_EL_TOKEN_DE_SOPORTE_TI
+@alertId = PEGA_EL_ID_DE_LA_ALERTA
 
 ### Estado de la API y PostgreSQL · 200
 GET {{host}}/api/health
@@ -68,4 +70,44 @@ Content-Type: application/json
 
 ### Bandeja biomédica · 200
 GET {{host}}/api/incidencias/equipos
+Authorization: Bearer {{biomedicaToken}}
+
+### Iniciar sesión como Soporte TI · 201
+POST {{host}}/api/sesiones-demo
+Content-Type: application/json
+
+{ "userId": "soporte-ti", "password": "medicore-demo-ds" }
+
+### Alertar desde estación con datos faltantes · 422
+POST {{host}}/api/alertas-ti
+Authorization: Bearer {{admisionToken}}
+Content-Type: application/json
+
+{ "stationId": "ADM-04" }
+
+### Enviar alerta crítica y copiar su id en alertId · 201
+POST {{host}}/api/alertas-ti
+Authorization: Bearer {{admisionToken}}
+Content-Type: application/json
+
+{ "stationId": "ADM-01" }
+
+### Bandeja de Soporte TI · 200
+GET {{host}}/api/soporte-ti/alertas
+Authorization: Bearer {{soporteToken}}
+
+### Detalle técnico · 200
+GET {{host}}/api/alertas-ti/{{alertId}}
+Authorization: Bearer {{soporteToken}}
+
+### Confirmar recepción dos veces · 200 con el mismo acknowledgedAt
+PUT {{host}}/api/alertas-ti/{{alertId}}/acuse
+Authorization: Bearer {{soporteToken}}
+
+### Consultar el acuse como reportante · 200
+GET {{host}}/api/alertas-ti/{{alertId}}
+Authorization: Bearer {{admisionToken}}
+
+### Consultar el acuse con un perfil ajeno · 403
+GET {{host}}/api/alertas-ti/{{alertId}}
 Authorization: Bearer {{biomedicaToken}}

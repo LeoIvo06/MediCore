@@ -24,6 +24,6 @@ Para generar la versión de producción: `npm run build`. El proyecto fue creado
 
 ## Estado de integración
 
-El reporte de equipos, la bandeja de Biomédica y la ficha técnica usan la [API de Express con Prisma y PostgreSQL en Docker](backend/README.md). Las alertas de TI y los incidentes de Servicios Generales mantienen los datos locales de demostración.
+El reporte de equipos, la bandeja de Biomédica y la ficha técnica usan la [API de Express con Prisma y PostgreSQL en Docker](backend/README.md). Las alertas de Admisión, la bandeja de Soporte TI y el acuse también se guardan en PostgreSQL. La bandeja de Servicios Generales mantiene los datos locales de demostración.
 
 Perfiles de prueba: Enfermería, Admisión, Servicios Generales, Soporte TI e Ingeniería Biomédica. Los datos son ficticios.

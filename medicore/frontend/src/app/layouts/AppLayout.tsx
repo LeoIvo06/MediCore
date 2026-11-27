@@ -1,4 +1,4 @@
-import { Bell, ChevronDown, ClipboardList, Home, MapPin, Menu, Monitor, PlusCircle, Stethoscope } from 'lucide-react'
+import { Bell, ChevronDown, ClipboardList, Home, MapPin, Menu, PlusCircle, Stethoscope } from 'lucide-react'
 import { useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { roleLabels, type UserRole } from '../../shared/types'
@@ -20,7 +20,6 @@ export default function AppLayout() {
     ...(state.activeRole === 'admissions' ? [{ to: '/alerta-ti', label: 'Alerta rápida', icon: Bell }] : []),
     ...(['general-services', 'it-support', 'biomedical'].includes(state.activeRole) ? [{ to: '/bandeja', label: state.activeRole === 'biomedical' ? 'Bandeja biomédica' : 'Lista de incidentes', icon: ClipboardList }] : []),
     ...(state.activeRole === 'biomedical' ? [{ to: '/equipos/eq-vent-00123', label: 'Ficha técnica', icon: Stethoscope }] : []),
-    ...(state.activeRole === 'it-support' ? [{ to: '/alerta-ti', label: 'Probar alerta TI', icon: Monitor }] : []),
   ]
   return <div className="min-h-screen bg-[#f3f6f9] text-ink">
     <aside className="fixed inset-y-0 left-0 z-30 hidden w-[244px] flex-col bg-sidebar text-white lg:flex">

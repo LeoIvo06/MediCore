@@ -3,6 +3,8 @@ import type { UserRole } from '../types'
 const profiles: Partial<Record<UserRole, { userId: string; password: string }>> = {
   nursing: { userId: 'enfermeria', password: 'medicore-demo-cm' },
   biomedical: { userId: 'biomedica', password: 'medicore-demo-md' },
+  admissions: { userId: 'admision', password: 'medicore-demo-jr' },
+  'it-support': { userId: 'soporte-ti', password: 'medicore-demo-ds' },
 }
 
 interface DemoSession {

@@ -19,7 +19,7 @@ export function canReadIncident(actor: DemoPrincipal, incident: IncidentAccessSc
     ((actor.role === 'nursing' || actor.role === 'admissions') && actor.id === incident.reporterId)
 }
 
-export function canConfirmAlert(actor: DemoPrincipal, incident: IncidentAccessScope): boolean {
+export function canConfirmAlert(actor: DemoPrincipal, incident: Pick<IncidentAccessScope, 'area' | 'kind'>): boolean {
   return actor.role === 'it-support' && incident.area === 'TI' && incident.kind === 'alerta-ti'
 }
 

@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react'
 import type { UserRole } from '../types'
 import { demoApi } from './demoApi'
 
-export function useDemoQuery<T>(role: UserRole, path: string | null) {
-  const key = path ? `${role}:${path}` : null
+export function useDemoQuery<T>(role: UserRole, path: string | null, revision = 0) {
+  const key = path ? `${role}:${path}:${revision}` : null
   const [result, setResult] = useState<{ key: string; data: T | null; error: Error | null }>()
   useEffect(() => {
     if (!key || !path) return

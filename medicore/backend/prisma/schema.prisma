@@ -92,3 +92,18 @@ model EquipmentIncident {
   @@index([createdAt])
   @@map("equipment_incidents")
 }
+
+model ITAlert {
+  number         Int       @id @default(autoincrement())
+  stationId      String
+  location       String
+  floor          Int
+  ip             String?
+  reporterId     String
+  reporterName   String
+  createdAt      DateTime  @default(now())
+  acknowledgedAt DateTime?
+
+  @@index([reporterId, createdAt])
+  @@map("it_alerts")
+}

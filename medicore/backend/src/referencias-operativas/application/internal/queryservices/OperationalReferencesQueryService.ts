@@ -12,6 +12,10 @@ export class OperationalReferencesQueryService {
     return { locations, equipment, symptoms }
   }
 
+  listStations() {
+    return this.repository.listStations()
+  }
+
   getStation(id: string) {
     return this.repository.findStation(id)
   }

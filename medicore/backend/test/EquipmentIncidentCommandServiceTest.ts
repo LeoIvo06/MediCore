@@ -21,6 +21,7 @@ function setup() {
     async listEquipment() { return [{ id: 'vent', label: 'Ventilador', locationId: 'uci' }] },
     async listLocations() { return [{ id: 'uci', label: 'UCI', floor: 3 }] },
     async listSymptoms() { return [{ id: 'no-enciende', label: 'No enciende' }] },
+    async listStations() { return [] },
     async findStation() { return null },
     async findEquipment() { return null },
   })

@@ -1,4 +1,8 @@
 import express from 'express'
+import { ITAlertCommandService } from './incidencias/application/internal/commandservices/ITAlertCommandService.js'
+import { ITAlertQueryService } from './incidencias/application/internal/queryservices/ITAlertQueryService.js'
+import { ITAlertRepositoryAdapter } from './incidencias/infrastructure/persistence/prisma/adapters/ITAlertRepositoryAdapter.js'
+import { createITAlertsController } from './incidencias/interfaces/rest/ITAlertsController.js'
 import { EquipmentIncidentCommandService } from './incidencias/application/internal/commandservices/EquipmentIncidentCommandService.js'
 import { EquipmentIncidentQueryService } from './incidencias/application/internal/queryservices/EquipmentIncidentQueryService.js'
 import { EquipmentIncidentRepositoryAdapter } from './incidencias/infrastructure/persistence/prisma/adapters/EquipmentIncidentRepositoryAdapter.js'
@@ -40,6 +44,10 @@ export function createApp(prisma: PrismaClient) {
   app.use('/api/referencias', createOperationalReferencesController(references, requireRole))
   app.use('/api/incidencias', createReportOptionsController(reportOptions, requireRole))
   app.use('/api/incidencias', createEquipmentIncidentsController(commands, queries, requireRole))
+  const alerts = new ITAlertRepositoryAdapter(prisma)
+  app.use('/api', createITAlertsController(
+    new ITAlertCommandService(externalReferences, alerts), new ITAlertQueryService(alerts), requireRole,
+  ))
   app.use(globalExceptionHandler)
   return app
 }
