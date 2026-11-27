@@ -23,8 +23,8 @@ export default function AppLayout() {
   ]
   return <div className="min-h-screen bg-[#f3f6f9] text-ink">
     <aside className="fixed inset-y-0 left-0 z-30 hidden w-[244px] flex-col bg-sidebar text-white lg:flex">
-      <NavLink to="/" className="block px-6 pb-8 pt-6">
-        <img src="/medicore-sidebar.png" alt="MediCore" className="h-auto w-full rounded-md" width="429" height="288" />
+      <NavLink to="/" className="flex justify-center px-6 py-5">
+        <img src="/medicore-sidebar.png" alt="MediCore" className="h-auto w-40 max-w-full" width="384" height="256" />
       </NavLink>
       <div className="flex items-center gap-3 px-5 pb-8">
         <div className="grid h-11 w-11 place-items-center rounded-full bg-sky-100 text-sidebar"><span className="text-sm font-bold">{profile.initials}</span></div>
