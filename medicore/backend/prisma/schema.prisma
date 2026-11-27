@@ -74,3 +74,21 @@ model DemoUser {
 
   @@map("demo_users")
 }
+
+/// Incidencias conserva el contexto registrado y referencia los catálogos por ID.
+model EquipmentIncident {
+  number        Int      @id @default(autoincrement())
+  equipmentId   String
+  equipmentName String
+  locationId    String
+  locationLabel String
+  floor         Int
+  symptomId     String
+  symptomLabel  String
+  reporterId    String
+  reporterName  String
+  createdAt     DateTime @default(now())
+
+  @@index([createdAt])
+  @@map("equipment_incidents")
+}

@@ -1,4 +1,8 @@
 import express from 'express'
+import { EquipmentIncidentCommandService } from './incidencias/application/internal/commandservices/EquipmentIncidentCommandService.js'
+import { EquipmentIncidentQueryService } from './incidencias/application/internal/queryservices/EquipmentIncidentQueryService.js'
+import { EquipmentIncidentRepositoryAdapter } from './incidencias/infrastructure/persistence/prisma/adapters/EquipmentIncidentRepositoryAdapter.js'
+import { createEquipmentIncidentsController } from './incidencias/interfaces/rest/EquipmentIncidentsController.js'
 import { ExternalOperationalReferencesService } from './incidencias/application/internal/outboundservices/acl/ExternalOperationalReferencesService.js'
 import { ReportOptionsQueryService } from './incidencias/application/internal/queryservices/ReportOptionsQueryService.js'
 import { createReportOptionsController } from './incidencias/interfaces/rest/ReportOptionsController.js'
@@ -25,12 +29,17 @@ export function createApp(prisma: PrismaClient) {
   const requireRole = createDemoAuthorization(auth)
   const references = new OperationalReferencesQueryService(new OperationalReferencesRepositoryAdapter(prisma))
   const facade = new OperationalReferencesContextFacade(references)
-  const reportOptions = new ReportOptionsQueryService(new ExternalOperationalReferencesService(facade))
+  const externalReferences = new ExternalOperationalReferencesService(facade)
+  const reportOptions = new ReportOptionsQueryService(externalReferences)
+  const incidents = new EquipmentIncidentRepositoryAdapter(prisma)
+  const commands = new EquipmentIncidentCommandService(externalReferences, incidents)
+  const queries = new EquipmentIncidentQueryService(incidents)
 
   app.use('/api', createHealthController(async () => { await prisma.$queryRaw`SELECT 1` }))
   app.use('/api', createDemoSessionController(auth, requireRole))
   app.use('/api/referencias', createOperationalReferencesController(references, requireRole))
   app.use('/api/incidencias', createReportOptionsController(reportOptions, requireRole))
+  app.use('/api/incidencias', createEquipmentIncidentsController(commands, queries, requireRole))
   app.use(globalExceptionHandler)
   return app
 }

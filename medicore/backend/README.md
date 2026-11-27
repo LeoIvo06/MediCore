@@ -58,3 +58,13 @@ El seed se puede repetir y conserva los registros existentes. Las cuentas de pru
 Usa [demo.http](demo.http) para iniciar sesión y probar los catálogos, las estaciones, las fichas y los rechazos por permiso. El [contrato API](../docs/api/README.md) indica el perfil habilitado en cada ruta.
 
 Incidencias usa `ExternalOperationalReferencesService` desde `application/internal/outboundservices/acl` y Referencias Operativas publica `OperationalReferencesContextFacade` en `interfaces/acl`. La prueba `ArchitectureTest` verifica este límite, la dirección de la dependencia y la separación de Prisma respecto del dominio.
+
+## Reporte de equipo y ficha biomédica
+
+Aplica las migraciones y carga los datos ficticios con los comandos anteriores. En otra terminal, desde `medicore/frontend`, ejecuta `npm.cmd ci` y `npm.cmd run dev`. Vite reenvía las peticiones `/api` al backend de desarrollo.
+
+1. En **Perfil demo**, elige **Enfermería** y abre **Reportar falla**. Selecciona solo una ubicación y envía. Debes ver los campos faltantes y conservar la ubicación.
+2. Completa el equipo y el síntoma, envía y anota el identificador `INC-EQ-…`.
+3. Cambia a **Ingeniería Biomédica**, abre **Bandeja biomédica** y busca ese ID. En el detalle, abre **Ficha técnica** y comprueba que el historial corresponde al equipo reportado.
+
+Las pantallas de este flujo inician la sesión de demo al consultar la API. Los datos de las incidencias de equipo se guardan en PostgreSQL. Los datos de alertas de TI y Servicios Generales siguen en el repositorio local de la interfaz.

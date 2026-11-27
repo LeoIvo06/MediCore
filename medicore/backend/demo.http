@@ -51,3 +51,21 @@ Authorization: Bearer {{biomedicaToken}}
 ### Equipo inexistente · 404
 GET {{host}}/api/referencias/equipos/no-existe
 Authorization: Bearer {{biomedicaToken}}
+
+### Reporte incompleto · 422
+POST {{host}}/api/incidencias/equipos
+Authorization: Bearer {{enfermeriaToken}}
+Content-Type: application/json
+
+{ "locationId": "uci-3" }
+
+### Registrar reporte · 201
+POST {{host}}/api/incidencias/equipos
+Authorization: Bearer {{enfermeriaToken}}
+Content-Type: application/json
+
+{ "equipmentId": "eq-vent-00123", "locationId": "uci-3", "symptomId": "no-enciende" }
+
+### Bandeja biomédica · 200
+GET {{host}}/api/incidencias/equipos
+Authorization: Bearer {{biomedicaToken}}

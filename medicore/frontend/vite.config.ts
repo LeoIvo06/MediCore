@@ -2,4 +2,10 @@ import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 
-export default defineConfig({ plugins: [react(), tailwindcss()] })
+const proxy = { '/api': process.env.MEDICORE_API_URL ?? 'http://127.0.0.1:3001' }
+
+export default defineConfig({
+  plugins: [react(), tailwindcss()],
+  server: { proxy },
+  preview: { proxy },
+})
