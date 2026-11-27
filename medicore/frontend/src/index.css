@@ -1,6 +1,9 @@
 @import "tailwindcss";
 
 @theme {
+  --color-page: #f3f6f9;
+  --color-surface: #fff;
+  --color-accent: #087b86;
   --color-sidebar: #123d55;
   --color-brand: #159eaa;
   --color-brand-dark: #11828d;
@@ -11,7 +14,39 @@
   --font-sans: "Inter", "Segoe UI", Arial, sans-serif;
 }
 
-:root { font-family: var(--font-sans); color: #183c57; background: #f3f6f9; font-synthesis: none; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
+:root { font-family: var(--font-sans); color-scheme: light; color: var(--color-ink); background: var(--color-page); font-synthesis: none; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-page: #0b1722;
+  --color-surface: #142635;
+  --color-ink: #e9f3fa;
+  --color-muted: #a6bfd1;
+  --color-line: #304657;
+  --color-sidebar: #102738;
+  --color-brand: #087b86;
+  --color-brand-dark: #076570;
+  --color-accent: #60d7df;
+  --color-slate-50: #1c3142;
+  --color-slate-100: #233a4c;
+  --color-slate-400: #94aabc;
+  --color-slate-600: #bccddd;
+  --color-cyan-50: #173b44;
+  --color-sky-50: #172f44;
+  --color-sky-100: #1e3c55;
+  --color-sky-700: #a3d8ff;
+  --color-emerald-50: #14382f;
+  --color-emerald-100: #1a4138;
+  --color-emerald-200: #2e6656;
+  --color-emerald-700: #9aedcc;
+  --color-emerald-800: #aff5d7;
+  --color-orange-100: #472f20;
+  --color-orange-700: #ffd19e;
+  --color-red-100: #4a2631;
+  --color-red-600: #ffadb8;
+  --color-red-700: #ffc0c9;
+  --shadow-card: 0 1px 3px rgb(0 0 0 / 24%);
+}
+
 * { box-sizing: border-box; }
 body { margin: 0; min-width: 320px; min-height: 100vh; }
 button, input, select, textarea { font: inherit; }

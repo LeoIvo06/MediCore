@@ -6,6 +6,13 @@
     <meta name="theme-color" content="#123d55" />
     <meta name="description" content="MediCore - gestión operativa de incidencias" />
     <link rel="icon" type="image/png" sizes="64x64" href="/medicore-tab.png" />
+    <script>
+      try {
+        if (localStorage.getItem('medicore-theme') === 'dark') document.documentElement.dataset.theme = 'dark'
+      } catch {
+        // The default theme remains available when storage is blocked.
+      }
+    </script>
     <title>MediCore | Incidencias</title>
   </head>
   <body>

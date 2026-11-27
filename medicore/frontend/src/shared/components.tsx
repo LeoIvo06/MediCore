@@ -6,7 +6,7 @@ export function PageTitle({ title, description, action }: { title: string; descr
 }
 
 export function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
-  return <section className={`rounded-xl border border-line bg-white shadow-card ${className}`}>{children}</section>
+  return <section className={`rounded-xl border border-line bg-surface shadow-card ${className}`}>{children}</section>
 }
 
 export function PriorityBadge({ priority }: { priority: Priority }) {
@@ -27,8 +27,8 @@ export function Field({ label, error, children }: { label: string; error?: strin
 }
 
 export function TextInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
-  return <input {...props} className={`w-full rounded-lg border border-line bg-white px-3.5 py-2.5 text-sm text-ink outline-none transition placeholder:text-slate-400 focus:border-brand focus:ring-2 focus:ring-brand/15 ${props.className ?? ''}`} />
+  return <input {...props} className={`w-full rounded-lg border border-line bg-surface px-3.5 py-2.5 text-base text-ink outline-none sm:text-sm transition placeholder:text-slate-400 focus:border-brand focus:ring-2 focus:ring-brand/15 ${props.className ?? ''}`} />
 }
 export function SelectInput(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
-  return <select {...props} className={`w-full rounded-lg border border-line bg-white px-3.5 py-2.5 text-sm text-ink outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/15 ${props.className ?? ''}`} />
+  return <select {...props} className={`w-full rounded-lg border border-line bg-surface px-3.5 py-2.5 text-base text-ink outline-none sm:text-sm transition focus:border-brand focus:ring-2 focus:ring-brand/15 ${props.className ?? ''}`} />
 }
