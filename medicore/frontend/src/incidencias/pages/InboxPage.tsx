@@ -99,7 +99,8 @@ function IncidentInbox({ role }: { role: 'it-support' | 'biomedical' | 'general-
       <button type="button" className="mc-button mc-button-secondary mc-button-compact" disabled={!hasResults} onClick={() => exportIncidentList(groups.flatMap((group) => group.incidents), isIT)}>
         <Download size={16} aria-hidden="true" /> Exportar CSV
       </button></div>
-      {hasResults && <div className="overflow-x-auto" role="region" aria-label="Tabla de incidentes" tabIndex={0}><table className="mc-table"><thead className="bg-slate-50 text-xs text-muted"><tr><th className="px-4 py-3 font-medium">Prioridad</th><th className="px-4 py-3 font-medium">ID / Incidente</th><th className="px-4 py-3 font-medium">Descripción</th><th className="px-4 py-3 font-medium">Ubicación</th><th className="px-4 py-3 font-medium">Estado</th>{isIT && <th className="px-4 py-3 font-medium">Acuse</th>}<th className="px-4 py-3 font-medium">Detalle</th></tr></thead>
+      {hasResults && <IncidentInboxList groups={groups} />}
+      {hasResults && <div className="hidden overflow-x-auto xl:block" role="region" aria-label="Tabla de incidentes" tabIndex={0}><table className="mc-table"><thead className="bg-slate-50 text-xs text-muted"><tr><th className="px-4 py-3 font-medium">Prioridad</th><th className="px-4 py-3 font-medium">ID / Incidente</th><th className="px-4 py-3 font-medium">Descripción</th><th className="px-4 py-3 font-medium">Ubicación</th><th className="px-4 py-3 font-medium">Estado</th>{isIT && <th className="px-4 py-3 font-medium">Acuse</th>}<th className="px-4 py-3 font-medium">Detalle</th></tr></thead>
         {groups.map((group) => <tbody key={group.floor ?? 'incidents'} className="divide-y divide-line">
           {group.floor !== null && <tr className="border-t border-line bg-sky-50/80"><th scope="rowgroup" colSpan={6} className="px-4 py-2 text-left font-semibold text-accent">Piso {group.floor}</th></tr>}
           {group.incidents.map((incident) => <tr key={incident.id} className="hover:bg-slate-50/80"><td className="px-4 py-4"><PriorityBadge priority={incident.priority} /></td><td className="px-4 py-4"><Link to={`/incidentes/${incident.id}`} className="font-semibold text-accent hover:underline">{incident.id}</Link><div className="mt-1 max-w-[240px] font-medium text-ink">{incident.title}</div></td><td className="max-w-[240px] px-4 py-4 text-muted">{incident.description}{incident.stationId && <div className="mt-1 text-xs">Estación {incident.stationId}{incident.ip ? ` · IP ${incident.ip}` : ''}</div>}</td><td className="px-4 py-4 text-ink">{incident.location}<div className="mt-1 text-xs text-muted">Piso {incident.floor}</div></td><td className="px-4 py-4"><StatusBadge status={incident.status} /></td>{isIT && <td className="px-4 py-4 text-xs text-muted">{incident.acknowledgedAt ? new Date(incident.acknowledgedAt).toLocaleString('es-PE') : 'Pendiente'}</td>}<td className="px-4 py-4"><Link to={`/incidentes/${incident.id}`} className="mc-button mc-button-secondary mc-button-compact">Ver detalle <ArrowRight size={14} /></Link></td></tr>)}
@@ -122,4 +123,43 @@ function IncidentInbox({ role }: { role: 'it-support' | 'biomedical' | 'general-
       )}
     </Card>
   </>
+}
+
+
+function IncidentInboxList({ groups }: { groups: { floor: number | null; incidents: Incident[] }[] }) {
+  return (
+    <div className="divide-y divide-line xl:hidden">
+      {groups.map(({ floor, incidents }) => (
+        <div key={floor ?? 'incidents'}>
+          {floor !== null && (
+            <h3 className="bg-sky-50/80 px-4 py-2 text-sm font-semibold text-accent">Piso {floor}</h3>
+          )}
+          <ul role="list" className="divide-y divide-line">
+            {incidents.map((incident) => (
+              <li key={incident.id} className="space-y-3 px-4 py-4">
+                <div className="[overflow-wrap:anywhere]">
+                  <p className="text-xs font-semibold text-accent">{incident.id}</p>
+                  <p className="mt-1 font-semibold text-ink">{incident.title}</p>
+                  <p className="mt-1 text-sm text-muted">
+                    {incident.location}{floor === null && <> · Piso {incident.floor}</>}
+                  </p>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <StatusBadge status={incident.status} />
+                  <PriorityBadge priority={incident.priority} />
+                </div>
+                <Link
+                  to={`/incidentes/${incident.id}`}
+                  aria-label={`Ver detalle de ${incident.id}`}
+                  className="mc-button mc-button-secondary"
+                >
+                  Ver detalle <ArrowRight size={16} aria-hidden="true" />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  )
 }
