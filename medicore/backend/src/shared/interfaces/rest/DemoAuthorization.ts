@@ -5,10 +5,10 @@ import type { DemoRole } from '../../domain/security/DemoPrincipal.js'
 export type RequireDemoRole = (...roles: DemoRole[]) => RequestHandler
 
 export function createDemoAuthorization(auth: DemoAuthService): RequireDemoRole {
-  return (...roles) => (request, response, next) => {
+  return (...roles) => async (request, response, next) => {
     response.set('Cache-Control', 'no-store')
     const token = /^Bearer ([a-f\d]{64})$/i.exec(request.get('authorization') ?? '')?.[1]
-    const principal = token ? auth.getPrincipal(token) : null
+    const principal = token ? await auth.getPrincipal(token) : null
     if (!principal) {
       response.status(401).set('WWW-Authenticate', 'Bearer').json({ error: 'Sesión de demo requerida.' })
       return

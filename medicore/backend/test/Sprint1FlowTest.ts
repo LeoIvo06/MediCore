@@ -164,7 +164,7 @@ test('Sprint 1: las siete historias se ejercitan por HTTP y los datos sobreviven
     await request(path, 403, support)
   })
 
-  await t.test('el mismo reporte y el primer acuse sobreviven a la recreación de PostgreSQL', async () => {
+  await t.test('las sesiones, el reporte y el primer acuse sobreviven a la recreación de PostgreSQL', async () => {
     await server.close()
     const args = composeArgs(project)
     execFileSync('docker', [...args, 'up', '-d', '--force-recreate', '--wait'], { stdio: 'inherit' })
@@ -173,10 +173,9 @@ test('Sprint 1: las siete historias se ejercitan por HTTP y los datos sobreviven
     const url = new URL(database)
     url.host = address
     server = await start(url.href)
-    const biomedical = await login('biomedica', 'medicore-demo-md')
-    const reporter = await login('admision', 'medicore-demo-jr')
     await request(`${equipmentPath}/${equipmentId}`, 200, biomedical)
-    const alert = await request<Ticket>(`${alertPath}/${alertId}`, 200, reporter)
+    const alert = await request<Ticket>(`${alertPath}/${alertId}`, 200, admissions)
+    await request(`${alertPath}/${alertId}`, 403, biomedical)
     assert.equal(alert.acknowledgedAt, acknowledgedAt)
     assert.equal(alert.open, true)
   })

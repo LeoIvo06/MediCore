@@ -37,7 +37,7 @@ Como en ULima Market, cada bounded context se organiza por capas dentro de su pr
 
 ## Referencias Operativas y sesiones de demo
 
-El seed se puede repetir y conserva los registros existentes. Las cuentas de prueba son ficticias y las sesiones duran una hora en la instancia de Express.
+El seed se puede repetir y conserva los registros existentes. Las cuentas de prueba son ficticias y las sesiones duran una hora y persisten en PostgreSQL para que cualquier instancia de Express pueda validarlas.
 
 | Usuario | Perfil | Contraseña de demo |
 | --- | --- | --- |

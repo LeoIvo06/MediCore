@@ -46,3 +46,21 @@ Para la explicación técnica, sigue el registro de un reporte desde su controla
 Desde `backend`, `npm.cmd test` ejecuta las pruebas de dominio y arquitectura. `npm.cmd run test:integration` ejecuta los recorridos HTTP y comprueba la persistencia al recrear un contenedor de PostgreSQL con un volumen temporal. Abre [demo.http](backend/demo.http) en VS Code con REST Client para repetir las peticiones en vivo.
 
 Consulta la [estructura del backend](backend/README.md) y el [contrato de la API](docs/api/README.md).
+
+## Demo compartida en Vercel
+
+El proyecto se importa con **Root Directory** `medicore`, preset **Other** y Node.js 24. `vercel.json` publica la interfaz compilada y envía `/api/*` a la función que monta Express. Las rutas de React funcionan al abrirse directamente.
+
+1. Importa el repositorio en [Vercel](https://vercel.com/new). Conecta un PostgreSQL de demostración desde **Storage → Marketplace → Neon**. Configura `DATABASE_URL` para las funciones y `DATABASE_URL_UNPOOLED` para las migraciones si el proveedor ofrece una conexión directa. Usa las variables de servidor del proyecto.
+2. Desde `medicore`, con el CLI de Vercel vinculado al proyecto, instala las dependencias del backend y prepara la base de demostración con sus datos ficticios:
+
+   ```powershell
+   npm.cmd --prefix backend ci
+   npx.cmd vercel link
+   npx.cmd vercel env run -e production -- npm run db:prepare
+   npx.cmd vercel deploy --prod
+   ```
+
+3. Abre la URL publicada y comprueba `/api/health`. Debe responder `200` con `database: connected`. En la interfaz, usa **Perfil demo** para cambiar de rol y valida los tres recorridos. Abre también la ficha o el detalle de un incidente por enlace directo.
+
+Los cinco perfiles son de demostración. La base compartida debe contener únicamente datos ficticios. Los tokens se verifican en PostgreSQL y funcionan entre instancias de la API. El arranque local con Docker Compose también está disponible.

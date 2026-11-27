@@ -23,7 +23,10 @@ export default function AppLayout() {
   ]
   return <div className="min-h-screen bg-[#f3f6f9] text-ink">
     <aside className="fixed inset-y-0 left-0 z-30 hidden w-[244px] flex-col bg-sidebar text-white lg:flex">
-      <NavLink to="/" className="px-6 pb-8 pt-6 text-[26px] font-bold tracking-tight"><span className="mr-2 text-3xl text-cyan-400">M</span>Medi<span className="text-cyan-400">Core</span></NavLink>
+      <NavLink to="/" className="flex items-center gap-2.5 px-6 pb-8 pt-6 text-[26px] font-bold tracking-tight">
+        <img src="/medicore-mark.svg" alt="" className="size-8 shrink-0" width="32" height="32" />
+        <span>Medi<span className="text-[#3cbfd5]">Core</span></span>
+      </NavLink>
       <div className="flex items-center gap-3 px-5 pb-8">
         <div className="grid h-11 w-11 place-items-center rounded-full bg-sky-100 text-sidebar"><span className="text-sm font-bold">{profile.initials}</span></div>
         <div className="min-w-0"><div className="truncate text-sm font-semibold">{profile.name}</div><div className="mt-0.5 truncate text-xs text-slate-300">{profile.title}</div></div>
@@ -31,7 +34,7 @@ export default function AppLayout() {
       <nav className="space-y-1 px-3">
         {items.map(({ to, label, icon: Icon }) => <NavLink key={to} to={to} end={to === '/'} className={({ isActive }) => `flex items-center gap-3 rounded-lg px-3.5 py-3 text-sm transition ${isActive ? 'bg-brand font-semibold text-white' : 'text-slate-300 hover:bg-white/10 hover:text-white'}`}><Icon size={18} />{label}</NavLink>)}
       </nav>
-      <div className="mt-auto border-t border-white/10 px-5 py-5 text-xs text-slate-300"><span className="inline-flex items-center gap-2"><MapPin size={14} />Demo local · datos ficticios</span></div>
+      <div className="mt-auto border-t border-white/10 px-5 py-5 text-xs text-slate-300"><span className="inline-flex items-center gap-2"><MapPin size={14} />Demo · datos ficticios</span></div>
     </aside>
     <div className="lg:pl-[244px]">
       <header className="sticky top-0 z-20 flex min-h-[72px] items-center justify-between gap-4 border-b border-line bg-white px-4 sm:px-7">

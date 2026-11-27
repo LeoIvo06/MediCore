@@ -1,0 +1,26 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "npm --prefix backend ci --include=dev && npm --prefix frontend ci --include=dev",
+  "buildCommand": "npm run build",
+  "outputDirectory": "frontend/dist",
+  "functions": {
+    "api/dispatch.mjs": {
+      "includeFiles": "backend/dist/**",
+      "maxDuration": 30
+    }
+  },
+  "routes": [
+    {
+      "src": "^(/api(?:/.*)?)$",
+      "dest": "/api/dispatch?__medicore_path=$1"
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/.*",
+      "dest": "/index.html"
+    }
+  ]
+}

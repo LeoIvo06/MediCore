@@ -1,0 +1,8 @@
+.git/
+.vercel/
+**/.env
+**/.env.*
+!**/.env.example
+**/dist/
+**/node_modules/
+**/persistence/prisma/generated/

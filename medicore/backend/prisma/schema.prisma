@@ -67,10 +67,11 @@ model MaintenanceRecord {
 }
 
 model DemoUser {
-  id           String @id
+  id           String        @id
   name         String
   role         String
   passwordHash String
+  sessions     DemoSession[]
 
   @@map("demo_users")
 }
@@ -130,4 +131,14 @@ model GeneralServicesIncident {
 
   @@index([closedAt])
   @@map("general_services_incidents")
+}
+
+model DemoSession {
+  tokenHash String   @id
+  userId    String
+  expiresAt DateTime
+  user      DemoUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([expiresAt])
+  @@map("demo_sessions")
 }

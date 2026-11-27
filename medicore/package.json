@@ -1,0 +1,11 @@
+{
+  "name": "medicore-deploy",
+  "private": true,
+  "engines": {
+    "node": "24.x"
+  },
+  "scripts": {
+    "build": "npm --prefix backend run build && npm --prefix frontend run build",
+    "db:prepare": "npm --prefix backend run db:migrate && npm --prefix backend run generate && npm --prefix backend run db:seed"
+  }
+}

@@ -31,6 +31,7 @@ try {
   const database = new URL(testConfig.DATABASE_URL)
   database.host = address
   env.DATABASE_URL = database.href
+  env.DATABASE_URL_UNPOOLED = database.href
   const run = (...args) => execFileSync(process.execPath, args, { cwd, env, stdio: 'inherit' })
 
   run(prismaCli, 'generate')

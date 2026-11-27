@@ -19,6 +19,7 @@ import { OperationalReferencesContextFacade } from './referencias-operativas/int
 import { createOperationalReferencesController } from './referencias-operativas/interfaces/rest/OperationalReferencesController.js'
 import { DemoAuthService } from './shared/application/security/DemoAuthService.js'
 import { DemoCredentialRepository } from './shared/infrastructure/persistence/prisma/DemoCredentialRepository.js'
+import { DemoSessionRepositoryAdapter } from './shared/infrastructure/persistence/prisma/DemoSessionRepositoryAdapter.js'
 import type { PrismaClient } from './shared/infrastructure/persistence/prisma/generated/client.js'
 import { matchesDemoPassword } from './shared/infrastructure/security/DemoPassword.js'
 import { createDemoAuthorization } from './shared/interfaces/rest/DemoAuthorization.js'
@@ -32,7 +33,7 @@ export function createApp(prisma: PrismaClient) {
   app.use(express.json({ limit: '16kb' }))
 
   const users = new DemoCredentialRepository(prisma)
-  const auth = new DemoAuthService((id) => users.findById(id), matchesDemoPassword)
+  const auth = new DemoAuthService((id) => users.findById(id), matchesDemoPassword, new DemoSessionRepositoryAdapter(prisma))
   const requireRole = createDemoAuthorization(auth)
   const references = new OperationalReferencesQueryService(new OperationalReferencesRepositoryAdapter(prisma))
   const facade = new OperationalReferencesContextFacade(references)
