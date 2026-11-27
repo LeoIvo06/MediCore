@@ -23,8 +23,8 @@ Actualizado el 27 de noviembre de 2026. Usar este registro junto con el prompt m
 | --- | --- | --- |
 | 00 · Auditoría y arquitectura | Alta · EN VALIDACIÓN | Contraste con informe y ULima Market, respaldo y línea base reproducible. |
 | 01 · Sistema visual | Alta · APROBADA | Paleta, tipografía, espaciado, superficies, campos, botones, tablas y estados en los flujos existentes. Sin dependencias nuevas. |
-| 02 · Marca y entrada | Media · EN VALIDACIÓN | Isotipo común y presentación breve, repetible desde Perfil demo. |
-| 03 · Landing | Media · PENDIENTE | Definir la página pública después de validar la marca. |
+| 02 · Marca y entrada | Media · APROBADA | Isotipo común y presentación breve, repetible desde Perfil demo. |
+| 03 · Landing | Media · EN DESARROLLO | Definir la página pública después de validar la marca. |
 | 04–05 · Acceso y navegación | Alta · PENDIENTE | Navegación por rol parcial. Diseñar acceso real o delimitar el modo demo antes de introducir login público. |
 | 06 · Control Center | Media · PENDIENTE | Inicio y accesos rápidos existentes. Definir métricas autorizadas a partir de datos reales. |
 | 07A–C · Incidencias | Alta · PENDIENTE | Formularios, bandejas y detalle existentes. Alinear filtro y planificar avances del Sprint 2. |
@@ -51,7 +51,7 @@ El prompt maestro guía el desarrollo. La autorización expresa del usuario defi
 
 ## Fase 02 · Marca y animación de entrada
 
-- **EN VALIDACIÓN.** Se usa el isotipo aprobado junto al nombre en el encabezado móvil, la barra lateral y la presentación. El favicon se conserva. Se añaden títulos por ruta y metadatos para compartir con un recurso existente.
+- **APROBADA.** El usuario validó la animación en la demo. Se usa el isotipo aprobado junto al nombre en el encabezado móvil, la barra lateral y la presentación. El favicon se conserva. Se añaden títulos por ruta y metadatos para compartir con un recurso existente.
 - **MediCore Launch y Pulse.** Entrada de 880 ms, una vez por pestaña, con pulso SVG. El contenido sigue disponible mientras se muestra. En movimiento reducido aparece una versión estática que solo cambia de opacidad.
 - **Repetición.** Desde **Perfil demo → Repetir animación de entrada**. La opción devuelve el foco al botón de perfil.
 - **Pruebas locales.** El build pasó. Edge verificó inicio, recarga sin repetición, repetición manual, navegación, foco, tamaños de 360, 390 y 1440 px y movimiento reducido. Lint mantiene los dos avisos preexistentes.
