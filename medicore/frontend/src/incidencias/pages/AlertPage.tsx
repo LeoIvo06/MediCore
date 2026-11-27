@@ -21,7 +21,7 @@ const fieldNames: Record<string, string> = { stationId: 'estación válida', loc
 function ITAlertForm() {
   const [stationId, setStationId] = useState('')
   const [errors, setErrors] = useState<string[]>([])
-  const [createdId, setCreatedId] = useState('')
+  const [createdAlert, setCreatedAlert] = useState<Incident>()
   const [revision, setRevision] = useState(0)
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
@@ -33,13 +33,13 @@ function ITAlertForm() {
   async function submit(event: FormEvent) {
     event.preventDefault()
     if (submitting || !chosenId || !stations) return
-    setCreatedId('')
+    setCreatedAlert(undefined)
     setErrors([])
     setSubmitError('')
     setSubmitting(true)
     try {
       const alert = await sendITAlert(chosenId)
-      setCreatedId(alert.id)
+      setCreatedAlert(alert)
       setRevision((previous) => previous + 1)
     } catch (error) {
       if (error instanceof DemoApiError && error.status === 422) setErrors(error.fields)
@@ -53,7 +53,19 @@ function ITAlertForm() {
     {loading && <p role="status">Cargando las estaciones…</p>}
     {error && <p role="alert">No se pudieron cargar las estaciones. Recarga la página para reintentar.</p>}
     {submitError && <p role="alert" className="mb-4 text-red-600">{submitError}</p>}
-    {createdId && <div className="mb-5 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-800"><CheckCircle2 className="mt-0.5 shrink-0" size={20} /><div className="text-sm"><div className="font-semibold">Alerta enviada correctamente</div><p className="mt-1">El ticket <Link className="font-bold underline" to={`/incidentes/${createdId}`}>{createdId}</Link> ya aparece en la bandeja de TI.</p></div></div>}
+    {createdAlert && (
+      <div className="mb-5 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-800">
+        <CheckCircle2 className="mt-0.5 shrink-0" size={20} aria-hidden="true" />
+        <div className="min-w-0 text-sm">
+          <p role="status" className="font-semibold">Alerta enviada correctamente</p>
+          <p className="mt-1">El ticket <Link className="font-bold underline" to={`/incidentes/${createdAlert.id}`}>{createdAlert.id}</Link> ya aparece en la bandeja de TI.</p>
+          <dl className="mt-3 grid gap-x-6 gap-y-2 sm:grid-cols-[minmax(0,1fr)_auto]">
+            <div><dt className="font-semibold">Ubicación</dt><dd className="break-words">{createdAlert.location}</dd></div>
+            <div><dt className="font-semibold">Dirección IP</dt><dd>{createdAlert.ip ?? 'IP no disponible'}</dd></div>
+          </dl>
+        </div>
+      </div>
+    )}
     <Card className="max-w-3xl overflow-hidden"><div className="bg-critical-banner px-6 py-7 text-white sm:px-10"><div className="mx-auto flex max-w-xl items-center gap-5"><TriangleAlert size={56} className="shrink-0" /><div><p className="text-xl font-bold">Reportar caída de sistema</p><p className="mt-1 text-sm text-white/90">Envía la ubicación de la estación y solicita soporte de TI.</p></div></div></div>
       <form onSubmit={submit} className="space-y-5 p-5 sm:p-8">
         <p className="text-xs font-semibold uppercase tracking-wider text-accent">HU-JR1 · Encargado de Admisión</p>

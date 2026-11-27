@@ -10,32 +10,49 @@ export const inboxStatuses: Record<InboxRole, readonly IncidentStatus[]> = {
   'general-services': ['Pendiente', 'Resuelto'],
 }
 
-export const emptyInboxFilters = { search: '', priority: '', floor: '', status: '' }
-export type InboxFilters = typeof emptyInboxFilters
+export const allInboxStatuses = 'all'
+
+export interface InboxFilters {
+  search: string
+  priority: string
+  floor: string
+  status: string
+}
+
+export function defaultInboxFilters(role: InboxRole): InboxFilters {
+  return { search: '', priority: '', floor: '', status: role === 'general-services' ? 'Pendiente' : allInboxStatuses }
+}
+
+export function hasCustomInboxFilters(role: InboxRole, filters: InboxFilters) {
+  return Boolean(filters.search || filters.priority || filters.floor || filters.status !== defaultInboxFilters(role).status)
+}
 
 function storageKey(role: InboxRole) {
   return 'medicore-inbox-filters:' + role
 }
 
 export function loadInboxFilters(role: InboxRole): InboxFilters {
+  const defaults = defaultInboxFilters(role)
   try {
     const stored = localStorage.getItem(storageKey(role))
-    if (!stored) return emptyInboxFilters
+    if (!stored) return defaults
     const value = JSON.parse(stored) as Partial<InboxFilters> | null
     return {
       search: typeof value?.search === 'string' ? value.search : '',
       priority: inboxPriorities.find((priority) => priority === value?.priority) ?? '',
       floor: typeof value?.floor === 'string' && /^[1-9]\d*$/.test(value.floor) && Number.isSafeInteger(Number(value.floor)) ? value.floor : '',
-      status: inboxStatuses[role].find((status) => status === value?.status) ?? '',
+      status: value?.status === allInboxStatuses
+        ? allInboxStatuses
+        : inboxStatuses[role].find((status) => status === value?.status) ?? defaults.status,
     }
   } catch {
-    return emptyInboxFilters
+    return defaults
   }
 }
 
 export function saveInboxFilters(role: InboxRole, filters: InboxFilters) {
   try {
-    if (Object.values(filters).some(Boolean)) {
+    if (hasCustomInboxFilters(role, filters)) {
       localStorage.setItem(storageKey(role), JSON.stringify(filters))
     } else {
       localStorage.removeItem(storageKey(role))

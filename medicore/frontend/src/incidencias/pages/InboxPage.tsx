@@ -10,7 +10,7 @@ import { generalServicesIncidentsPath, type GeneralServicesFloorGroup } from '..
 import { supportAlertsPath } from '../api/itAlerts'
 import { useIncidents } from '../context/IncidentContext'
 import { exportIncidentList } from '../utils/exportIncidentList'
-import { emptyInboxFilters, inboxPriorities, inboxStatuses, loadInboxFilters, saveInboxFilters, type InboxFilters } from '../utils/inboxFilters'
+import { allInboxStatuses, defaultInboxFilters, hasCustomInboxFilters, inboxPriorities, inboxStatuses, loadInboxFilters, saveInboxFilters, type InboxFilters } from '../utils/inboxFilters'
 
 export default function InboxPage() {
   const role = useIncidents().state.activeRole
@@ -21,17 +21,19 @@ export default function InboxPage() {
 function IncidentInbox({ role }: { role: 'it-support' | 'biomedical' | 'general-services' }) {
   const [filters, setFilters] = useState(() => loadInboxFilters(role))
   const { search, priority, floor, status } = filters
-  const hasFilters = Object.values(filters).some(Boolean)
+  const hasFilters = hasCustomInboxFilters(role, filters)
   const searchInput = useRef<HTMLInputElement>(null)
   const [revision, setRevision] = useState(0)
   const resultsHeading = useRef<HTMLHeadingElement>(null)
   const isGeneralServices = role === 'general-services'
+  const onlyActive = isGeneralServices && status === 'Pendiente'
   const isIT = role === 'it-support'
   const isBiomedical = role === 'biomedical'
   const title = isIT ? 'Bandeja de soporte TI' : isBiomedical ? 'Bandeja biomédica' : 'Lista de incidentes'
   const description = isIT ? 'Alertas rápidas recibidas de Admisión.' : isBiomedical ? 'Incidentes relacionados con equipos médicos.' : 'Incidentes agrupados por piso y prioridad.'
   const inbox = useDemoQuery<Incident[]>(role, isIT ? supportAlertsPath : isBiomedical ? equipmentIncidentsPath : null, revision)
-  const generalServices = useDemoQuery<GeneralServicesFloorGroup[]>(role, isGeneralServices ? `${generalServicesIncidentsPath}?incluirResueltos=1` : null, revision)
+  const generalServicesPath = onlyActive ? generalServicesIncidentsPath : generalServicesIncidentsPath + '?incluirResueltos=1'
+  const generalServices = useDemoQuery<GeneralServicesFloorGroup[]>(role, isGeneralServices ? generalServicesPath : null, revision)
   const { loading, error } = isGeneralServices ? generalServices : inbox
   const incomingGroups = isGeneralServices ? generalServices.data ?? [] : [{
     floor: null,
@@ -48,12 +50,13 @@ function IncidentInbox({ role }: { role: 'it-support' | 'biomedical' | 'general-
       return searchable.includes(query) &&
         (!priority || incident.priority === priority) &&
         (!floor || String(incident.floor) === floor) &&
-        (!status || incident.status === status)
+        (status === allInboxStatuses || incident.status === status)
     }),
   })).filter((group) => group.incidents.length > 0)
   const count = groups.reduce((total, group) => total + group.incidents.length, 0)
   const hasIncidents = incomingGroups.some((group) => group.incidents.length > 0)
   const hasResults = !loading && !error && count > 0
+  const emptyMessage = onlyActive ? 'No hay incidentes activos.' : 'Todavía no hay incidentes en esta bandeja.'
 
   function applyFilters(next: InboxFilters) {
     setFilters(next)
@@ -84,12 +87,14 @@ function IncidentInbox({ role }: { role: 'it-support' | 'biomedical' | 'general-
         </Field>
         <Field label="Estado">
           <SelectInput value={status} onChange={(event) => applyFilters({ ...filters, status: event.target.value })}>
-            <option value="">Todos</option>
-            {inboxStatuses[role].map((item) => <option key={item}>{item}</option>)}
+            <option value={allInboxStatuses}>Todos</option>
+            {inboxStatuses[role].map((item) => (
+              <option key={item} value={item}>{isGeneralServices && item === 'Pendiente' ? 'Activos' : item}</option>
+            ))}
           </SelectInput>
         </Field>
         <button type="button" className="mc-button mc-button-secondary xl:whitespace-nowrap" disabled={!hasFilters} onClick={() => {
-          applyFilters(emptyInboxFilters)
+          applyFilters(defaultInboxFilters(role))
           searchInput.current?.focus()
         }}>Limpiar filtros</button>
       </div>
@@ -118,7 +123,7 @@ function IncidentInbox({ role }: { role: 'it-support' | 'biomedical' | 'general-
       )}
       {!loading && !error && !count && (
         <p role="status" className="px-5 py-8 text-sm text-muted">
-          {hasIncidents ? 'No hay incidentes que coincidan con los filtros.' : 'Todavía no hay incidentes en esta bandeja.'}
+          {hasIncidents ? 'No hay incidentes que coincidan con los filtros.' : emptyMessage}
         </p>
       )}
     </Card>
