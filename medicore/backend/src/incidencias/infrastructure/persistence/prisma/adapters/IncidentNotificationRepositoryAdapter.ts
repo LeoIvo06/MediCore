@@ -13,6 +13,13 @@ export class IncidentNotificationRepositoryAdapter implements IncidentNotificati
     })
   }
 
+  async markAllRead(recipientId: string, through: Date, readAt: Date) {
+    await this.prisma.incidentNotification.updateMany({
+      where: { recipientId, readAt: null, createdAt: { lte: through } },
+      data: { readAt },
+    })
+  }
+
   async markRead(recipientId: string, incidentId: string, readAt: Date) {
     const updated = await this.prisma.incidentNotification.updateMany({
       where: { recipientId, incidentId, readAt: null },

@@ -109,6 +109,33 @@ export function IncidentNotifications({ role, open, onToggle, onClose, trigger }
 
   useEffect(() => () => readRequest.current?.abort(), [])
 
+  async function markAllRead() {
+    if (opening || !items) return
+    const through = items.find((item) => !item.readAt)?.createdAt
+    if (!through) return
+
+    const controller = new AbortController()
+    readRequest.current = controller
+    setOpening(true)
+    setReadError(false)
+    try {
+      const updated = await demoApi<IncidentNotification[]>(role, incidentNotificationsPath + '/lectura', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ through }),
+        signal: controller.signal,
+      })
+      if (!controller.signal.aborted) {
+        refreshNotifications.current?.()
+        setItems(updated)
+      }
+    } catch {
+      if (!controller.signal.aborted) setReadError(true)
+    } finally {
+      if (!controller.signal.aborted) setOpening(false)
+    }
+  }
+
   async function openNotification(notification: IncidentNotification) {
     if (opening) return
     setReadError(false)
@@ -154,9 +181,14 @@ export function IncidentNotifications({ role, open, onToggle, onClose, trigger }
         hidden={!open}
         className="absolute inset-x-3 top-full mt-1 overflow-hidden rounded-lg border border-line bg-surface shadow-xl sm:left-auto sm:right-0 sm:w-80"
       >
-        <h2 className="border-b border-line px-4 py-3 text-sm font-semibold">Notificaciones</h2>
+        <div className="flex flex-wrap items-center justify-between gap-1 border-b border-line px-4 py-2">
+          <h2 className="text-sm font-semibold">Notificaciones</h2>
+          {items && <button type="button" onClick={() => void markAllRead()} disabled={opening || !unread} className="min-h-11 rounded-md px-2 text-xs font-semibold text-accent enabled:hover:bg-slate-50 disabled:text-muted">
+            {unread ? 'Marcar todas como leídas' : 'Todo leído'}
+          </button>}
+        </div>
         <div className="max-h-[min(24rem,calc(100dvh-8rem))] overflow-y-auto">
-          {readError && <p role="alert" className="px-4 py-3 text-sm text-red-600">No se pudo abrir la notificación. Vuelve a intentarlo.</p>}
+          {readError && <p role="alert" className="px-4 py-3 text-sm text-red-600">No se pudo actualizar la lectura. Vuelve a intentarlo.</p>}
           {loadError && <p role="status" className="px-4 py-3 text-sm text-muted">No se pudieron actualizar las notificaciones.</p>}
           {!items && !loadError && <p role="status" className="px-4 py-3 text-sm text-muted">Cargando notificaciones…</p>}
           {items?.length === 0 && !loadError && <p className="px-4 py-3 text-sm text-muted">Aún no tienes notificaciones.</p>}

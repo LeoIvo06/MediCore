@@ -36,6 +36,16 @@ export function createIncidentNotificationsController(
     }
   })
 
+  router.put('/lectura', requireRole(), async (request, response) => {
+    const cutoff = request.body?.through
+    const through = new Date(typeof cutoff === 'string' ? cutoff : '')
+    if (!Number.isFinite(through.getTime()) || through.toISOString() !== cutoff || through.getTime() > Date.now()) {
+      response.status(422).json({ error: 'Actualiza la lista de notificaciones y vuelve a intentarlo.' })
+      return
+    }
+    response.json(await service.markAllRead(response.locals.principal.id, through))
+  })
+
   router.put<{ id: string }>('/:id/lectura', requireRole(), async (request, response) => {
     const found = await service.markRead(response.locals.principal.id, request.params.id)
     if (!found) {

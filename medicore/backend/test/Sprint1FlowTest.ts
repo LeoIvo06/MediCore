@@ -242,6 +242,30 @@ test('Sprint 1: las siete historias se ejercitan por HTTP y los datos sobreviven
     assert.equal((await request<Notice[]>(notificationPath, 200, nursing))[0].readAt, null)
   })
 
+  await t.test('la lectura masiva respeta el perfil, conserva la hora y deja nuevos avisos pendientes', async () => {
+    const path = notificationPath + '/lectura'
+    const current = (await request<Notice[]>(notificationPath, 200, support))[0]
+    const original = await server.prisma.incidentNotification.findUniqueOrThrow({
+      where: { recipientId_incidentId: { recipientId: 'soporte-ti', incidentId: current.incidentId } },
+    })
+    const later = new Date(original.createdAt.getTime() + 1)
+    await server.prisma.incidentNotification.create({
+      data: { recipientId: 'soporte-ti', incidentId: 'INC-TI-999999', title: 'Aviso nuevo', createdAt: later },
+    })
+    const input = { through: original.createdAt.toISOString(), recipientId: 'admision' }
+    await request(path, 401, undefined, 'PUT', input)
+    await request(path, 422, support, 'PUT', { through: 'fecha inválida' })
+    await request(path, 422, support, 'PUT', { through: '2099-01-01T00:00:00.000Z' })
+    const first = await request<Notice[]>(path, 200, support, 'PUT', input)
+    assert.deepEqual(first.filter((notice) => notice.readAt === null).map(({ incidentId }) => incidentId), ['INC-TI-999999'])
+    const previous = first.find(({ incidentId }) => incidentId === current.incidentId)
+    assert.ok(previous?.readAt)
+    assert.deepEqual(await request(path, 200, support, 'PUT', input), first)
+    const second = await request<Notice[]>(path, 200, support, 'PUT', { through: later.toISOString() })
+    assert(second.every(({ readAt }) => readAt !== null))
+    assert.equal((await request<Notice[]>(notificationPath, 200, admissions))[0].readAt, null)
+  })
+
   const generalId = 'INC-2026-0141'
   await t.test('solo el área responsable resuelve y la bandeja conserva el nuevo estado', async () => {
     const operations = [
