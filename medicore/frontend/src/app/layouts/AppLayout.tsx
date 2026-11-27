@@ -2,6 +2,7 @@ import { Bell, ChevronDown, ClipboardList, Home, MapPin, Menu, Moon, PlusCircle,
 import { useEffect, useRef, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { roleLabels, type UserRole } from '../../shared/types'
+import { MediCoreBrand, MediCoreLaunch } from '../../shared/MediCoreBrand'
 import { useIncidents } from '../../incidencias/context/IncidentContext'
 import { IncidentNotifications } from '../../incidencias/components/IncidentNotifications'
 
@@ -11,7 +12,26 @@ const roleOptions: { value: UserRole; label: string }[] = [
   { value: 'biomedical', label: 'Ingeniería Biomédica' },
 ]
 
+const launchKey = 'medicore-launch-seen'
+
+function initialLaunch() {
+  try {
+    return sessionStorage.getItem(launchKey) === '1' ? 0 : 1
+  } catch {
+    return 1
+  }
+}
+
 export default function AppLayout() {
+  const [launch, setLaunch] = useState(initialLaunch)
+  const [finishedLaunch, setFinishedLaunch] = useState(0)
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(launchKey, '1')
+    } catch {
+      // The presentation is still available from the profile menu.
+    }
+  }, [])
   const { state, updateRole } = useIncidents()
   const [activeMenu, setActiveMenu] = useState<'navigation' | 'profile' | 'notifications' | null>(null)
   const [dark, setDark] = useState(() => document.documentElement.dataset.theme === 'dark')
@@ -61,13 +81,19 @@ export default function AppLayout() {
     ...(['general-services', 'it-support', 'biomedical'].includes(state.activeRole) ? [{ to: '/bandeja', label: state.activeRole === 'biomedical' ? 'Bandeja biomédica' : 'Lista de incidentes', icon: ClipboardList }] : []),
     ...(state.activeRole === 'biomedical' ? [{ to: '/equipos/eq-vent-00123', label: 'Ficha técnica', icon: Stethoscope }] : []),
   ]
+  const pageLabel = items.find((item) => item.to === location.pathname)?.label ??
+    (location.pathname.startsWith('/incidentes/') ? 'Detalle del incidente'
+      : location.pathname.startsWith('/equipos/') ? 'Ficha técnica' : 'Incidencias')
+
+  useEffect(() => {
+    document.title = 'MediCore | ' + pageLabel
+  }, [pageLabel])
+
   return <div className="min-h-screen bg-page text-ink">
+    {launch > finishedLaunch && <MediCoreLaunch key={launch} onFinish={() => setFinishedLaunch(launch)} />}
     <aside className="fixed inset-y-0 left-0 z-30 hidden w-[244px] flex-col bg-sidebar text-white lg:flex">
       <NavLink to="/" className="flex items-center gap-2 px-6 py-4">
-        <span className="relative h-[21px] w-9 shrink-0 overflow-hidden" aria-hidden="true">
-          <img src="/medicore-sidebar.png" alt="" className="absolute -left-[9px] -top-[3px] h-8 w-12 max-w-none" width="384" height="256" />
-        </span>
-        <span className="text-xl leading-7 font-bold tracking-tight">Medi<span className="text-[#30c4cb]">Core</span></span>
+        <MediCoreBrand />
       </NavLink>
       <div className="flex items-center gap-3 px-5 pb-8">
         <div className="grid h-11 w-11 place-items-center rounded-full bg-sky-100 text-accent"><span className="text-sm font-bold">{profile.initials}</span></div>
@@ -93,8 +119,10 @@ export default function AppLayout() {
             >
               <Menu size={20} aria-hidden="true" />
             </button>
-            <div className="truncate text-sm font-semibold">
-              MediCore <span className="font-normal text-muted">/ {items.find((item) => location.pathname.startsWith(item.to) && item.to !== '/')?.label ?? 'Inicio'}</span>
+            <div className="flex min-w-0 items-center gap-1.5 text-sm">
+              <span className="flex lg:hidden"><MediCoreBrand compact /></span>
+              <span className="hidden font-semibold lg:inline">MediCore</span>
+              <span className="truncate text-muted">/ {pageLabel}</span>
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-2 sm:gap-5">
@@ -137,6 +165,17 @@ export default function AppLayout() {
                     {role.label}
                   </button>
                 ))}
+                <button
+                  type="button"
+                  className="mt-1 block min-h-11 w-full rounded-md border-t border-line px-3 py-2 text-left text-sm font-medium text-accent hover:bg-slate-50"
+                  onClick={() => {
+                    setLaunch((previous) => previous + 1)
+                    setActiveMenu(null)
+                    profileTrigger.current?.focus()
+                  }}
+                >
+                  Repetir animación de entrada
+                </button>
               </div>
             </div>
           </div>

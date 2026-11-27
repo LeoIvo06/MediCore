@@ -23,7 +23,7 @@ Actualizado el 27 de noviembre de 2026. Usar este registro junto con el prompt m
 | --- | --- | --- |
 | 00 · Auditoría y arquitectura | Alta · EN VALIDACIÓN | Contraste con informe y ULima Market, respaldo y línea base reproducible. |
 | 01 · Sistema visual | Alta · APROBADA | Paleta, tipografía, espaciado, superficies, campos, botones, tablas y estados en los flujos existentes. Sin dependencias nuevas. |
-| 02 · Marca y entrada | Media · EN DESARROLLO | Isotipo común y presentación breve, repetible desde Perfil demo. |
+| 02 · Marca y entrada | Media · EN VALIDACIÓN | Isotipo común y presentación breve, repetible desde Perfil demo. |
 | 03 · Landing | Media · PENDIENTE | Definir la página pública después de validar la marca. |
 | 04–05 · Acceso y navegación | Alta · PENDIENTE | Navegación por rol parcial. Diseñar acceso real o delimitar el modo demo antes de introducir login público. |
 | 06 · Control Center | Media · PENDIENTE | Inicio y accesos rápidos existentes. Definir métricas autorizadas a partir de datos reales. |
@@ -48,3 +48,11 @@ El prompt maestro guía el desarrollo. La autorización expresa del usuario defi
 - **Verificación en Vercel.** El commit 895c3f7 quedó publicado en el dominio actual. Edge verificó catálogos, campana, bandeja con datos, tema y foco. La ruta de salud confirmó PostgreSQL. La compilación informó avisos de auditoría de dependencias del backend. Revisar su alcance en la fase de estabilidad. [Despliegue verificado](https://vercel.com/carlos-071e/medicore-demo/85bfSoXCYLGVwHJD1iKbtDzME7wt)
 - **Validación manual.** Como Enfermería abre Reportar falla. Como Servicios Generales abre la Bandeja. Alterna claro y oscuro y revisa los campos, los estados y el foco. Las capturas comparativas están junto al Git bundle.
 - **Siguiente propuesta.** Fase 02, tras validación del usuario. Definir el alcance de marca antes de implementar Pulse o la entrada animada. Razonamiento Low o Medium.
+
+## Fase 02 · Marca y animación de entrada
+
+- **EN VALIDACIÓN.** Se usa el isotipo aprobado junto al nombre en el encabezado móvil, la barra lateral y la presentación. El favicon se conserva. Se añaden títulos por ruta y metadatos para compartir con un recurso existente.
+- **MediCore Launch y Pulse.** Entrada de 880 ms, una vez por pestaña, con pulso SVG. El contenido sigue disponible mientras se muestra. En movimiento reducido aparece una versión estática que solo cambia de opacidad.
+- **Repetición.** Desde **Perfil demo → Repetir animación de entrada**. La opción devuelve el foco al botón de perfil.
+- **Pruebas locales.** El build pasó. Edge verificó inicio, recarga sin repetición, repetición manual, navegación, foco, tamaños de 360, 390 y 1440 px y movimiento reducido. Lint mantiene los dos avisos preexistentes.
+- **Siguiente fase.** La landing pública queda pendiente de aprobación de la Fase 02 y de una propuesta específica para la Fase 03.
