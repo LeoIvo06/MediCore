@@ -1,4 +1,11 @@
 let audio: AudioContext | undefined
+let player: HTMLAudioElement | undefined
+
+export function prefetchNotificationSound() {
+  if (player) return
+  player = new Audio('/medicore-aviso.wav')
+  player.preload = 'auto'
+}
 
 export function armNotificationSound() {
   if (typeof AudioContext === 'undefined') return
@@ -10,8 +17,22 @@ export function armNotificationSound() {
   }
 }
 
-export function playNotificationSound() {
-  if (!audio || audio.state !== 'running') return
+export async function playNotificationSound(): Promise<boolean> {
+  try {
+    prefetchNotificationSound()
+    if (player) {
+      player.currentTime = 0
+      await player.play()
+      return true
+    }
+  } catch {
+    // Try the Web Audio tone if media playback is blocked or unavailable.
+  }
+  return playSynthesizedTone()
+}
+
+function playSynthesizedTone() {
+  if (!audio || audio.state !== 'running') return false
   const oscillator = audio.createOscillator()
   const volume = audio.createGain()
   const now = audio.currentTime
@@ -25,4 +46,5 @@ export function playNotificationSound() {
   oscillator.start(now)
   oscillator.stop(now + 0.21)
   oscillator.onended = () => { oscillator.disconnect(); volume.disconnect() }
+  return true
 }

@@ -1,11 +1,11 @@
-import { Bell } from 'lucide-react'
+import { Bell, Volume2 } from 'lucide-react'
 import { useEffect, useRef, useState, type RefObject } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { demoApi } from '../../shared/api/demoApi'
 import type { UserRole } from '../../shared/types'
 import { incidentCreatedEvent, incidentNotificationsPath, listenForNotifications, type IncidentNotification } from '../api/incidentNotifications'
 
-import { armNotificationSound, playNotificationSound } from '../api/notificationSound'
+import { armNotificationSound, playNotificationSound, prefetchNotificationSound } from '../api/notificationSound'
 
 const timeFormat = new Intl.DateTimeFormat('es-PE', { dateStyle: 'short', timeStyle: 'short' })
 
@@ -21,6 +21,7 @@ export function IncidentNotifications({ role, open, onToggle, onClose, trigger }
   const [loadError, setLoadError] = useState(false)
   const [readError, setReadError] = useState(false)
   const [opening, setOpening] = useState(false)
+  const [soundCheck, setSoundCheck] = useState<'idle' | 'playing' | 'ready' | 'blocked'>('idle')
   const refreshNotifications = useRef<(() => void) | null>(null)
   const readRequest = useRef<AbortController | null>(null)
   const unread = items?.some((item) => !item.readAt) ?? false
@@ -43,7 +44,7 @@ export function IncidentNotifications({ role, open, onToggle, onClose, trigger }
           const previousNewest = newestSeen
           if (previousNewest !== undefined && data.some(
             (item) => !item.readAt && !seen.has(item.incidentId) && item.createdAt >= previousNewest,
-          )) playNotificationSound()
+          )) void playNotificationSound()
           newestSeen ??= ''
           for (const item of data) {
             seen.add(item.incidentId)
@@ -81,12 +82,14 @@ export function IncidentNotifications({ role, open, onToggle, onClose, trigger }
       }
     }
 
+    prefetchNotificationSound()
     refreshNotifications.current = refresh
     refresh()
     connect()
     const timer = window.setInterval(() => { if (!streamReady) refresh() }, 2000)
     document.addEventListener('visibilitychange', onVisibilityChange)
     window.addEventListener(incidentCreatedEvent, refresh)
+    document.addEventListener('touchend', armNotificationSound, { passive: true })
     document.addEventListener('click', armNotificationSound)
     document.addEventListener('keydown', armNotificationSound)
     return () => {
@@ -97,6 +100,7 @@ export function IncidentNotifications({ role, open, onToggle, onClose, trigger }
       window.clearTimeout(retry)
       document.removeEventListener('visibilitychange', onVisibilityChange)
       window.removeEventListener(incidentCreatedEvent, refresh)
+      document.removeEventListener('touchend', armNotificationSound)
       document.removeEventListener('click', armNotificationSound)
       document.removeEventListener('keydown', armNotificationSound)
     }
@@ -105,6 +109,13 @@ export function IncidentNotifications({ role, open, onToggle, onClose, trigger }
   useEffect(() => { if (open) refreshNotifications.current?.() }, [open])
 
   useEffect(() => () => readRequest.current?.abort(), [])
+
+  async function testSound() {
+    armNotificationSound()
+    setSoundCheck('playing')
+    const played = await playNotificationSound()
+    setSoundCheck(played ? 'ready' : 'blocked')
+  }
 
   async function openNotification(notification: IncidentNotification) {
     if (opening) return
@@ -151,7 +162,14 @@ export function IncidentNotifications({ role, open, onToggle, onClose, trigger }
         hidden={!open}
         className="absolute inset-x-3 top-full mt-1 overflow-hidden rounded-lg border border-line bg-surface shadow-xl sm:left-auto sm:right-0 sm:w-80"
       >
-        <h2 className="border-b border-line px-4 py-3 text-sm font-semibold">Notificaciones</h2>
+        <div className="flex items-center justify-between gap-2 border-b border-line px-4 py-2">
+          <h2 className="text-sm font-semibold">Notificaciones</h2>
+          <button type="button" disabled={soundCheck === 'playing'} onClick={() => void testSound()} className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-2 text-xs font-medium text-accent hover:bg-slate-50">
+            <Volume2 size={16} aria-hidden="true" />{soundCheck === 'ready' ? 'Probar sonido' : 'Activar sonido'}
+          </button>
+        </div>
+        {soundCheck === 'ready' && <p role="status" className="border-b border-line px-4 py-2 text-xs text-muted">Sonido activado para esta sesión.</p>}
+        {soundCheck === 'blocked' && <p role="status" className="border-b border-line px-4 py-2 text-xs text-muted">El navegador bloqueó el audio. Toca «Activar sonido» para reintentar.</p>}
         <div className="max-h-[min(24rem,calc(100dvh-8rem))] overflow-y-auto">
           {readError && <p role="alert" className="px-4 py-3 text-sm text-red-600">No se pudo abrir la notificación. Vuelve a intentarlo.</p>}
           {loadError && <p role="status" className="px-4 py-3 text-sm text-muted">No se pudieron actualizar las notificaciones.</p>}
