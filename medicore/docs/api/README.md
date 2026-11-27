@@ -36,4 +36,9 @@ El registro recibe `equipmentId`, `locationId` y `symptomId`. Express obtiene el
 
 El envío recibe `stationId`. La ubicación y la IP se consultan por la fachada ACL, y el reportante proviene de la sesión. El detalle omite la IP cuando el ticket no la tiene registrada.
 
-Los endpoints de Servicios Generales se implementan en el bloque siguiente.
+### Servicios Generales
+
+| Método y ruta | Acceso | Respuesta |
+| --- | --- | --- |
+| `GET /servicios-generales/incidencias` | Servicios Generales | Incidentes activos agrupados en `{ floor, incidents }`. Dentro de cada piso se ordenan por prioridad descendente y, en empate, por fecha ascendente. |
+| `GET /servicios-generales/incidencias/:id` | Servicios Generales | Detalle con ID, tipo, ubicación exacta, síntoma y estado. Devuelve `404` si el ID no existe. |

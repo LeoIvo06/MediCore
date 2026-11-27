@@ -49,6 +49,39 @@ const profiles = [
   { id: 'biomedica', name: 'Marco Doe', role: 'biomedical', password: 'medicore-demo-md' },
 ]
 
+const generalServicesIncidents = [
+  {
+    id: 'INC-2026-0139', title: 'Sin red Wi-Fi en el área de Emergencias', incidentType: 'Conectividad',
+    description: 'La conexión no está disponible en el área.', symptom: 'Red Wi-Fi no disponible',
+    location: 'Emergencias · Box 2', floor: 1, priority: 'Medium', reportedBy: 'Ana Torres',
+    createdAt: new Date('2026-10-14T09:30:00-05:00'),
+  },
+  {
+    id: 'INC-2026-0140', title: 'Falla en el sistema de agua caliente', incidentType: 'Instalaciones sanitarias',
+    description: 'Las duchas del área de hospitalización tienen agua fría.', symptom: 'Agua fría al abrir la ducha',
+    location: 'Hospitalización · Habitación 306', floor: 3, priority: 'High', reportedBy: 'Pedro Aliaga',
+    createdAt: new Date('2026-10-14T09:50:00-05:00'),
+  },
+  {
+    id: 'INC-2026-0141', title: 'Impresora de laboratorio sin conexión', incidentType: 'Equipo de oficina',
+    description: 'No se reciben trabajos de impresión.', symptom: 'Trabajos de impresión en espera',
+    location: 'Laboratorio · Estación de impresión 1', floor: 3, priority: 'High', reportedBy: 'Carmen Vega',
+    createdAt: new Date('2026-10-14T10:13:00-05:00'),
+  },
+  {
+    id: 'INC-2026-0143', title: 'Luminaria intermitente', incidentType: 'Instalaciones eléctricas',
+    description: 'La luminaria parpadea al encenderse.', symptom: 'Parpadeo repetido',
+    location: 'Laboratorio · Pasillo este', floor: 3, priority: 'Medium', reportedBy: 'Carmen Vega',
+    createdAt: new Date('2026-10-14T08:00:00-05:00'),
+  },
+  {
+    id: 'INC-2026-0144', title: 'Puerta de almacén atascada', incidentType: 'Infraestructura',
+    description: 'Se corrigió el cierre de la puerta.', symptom: 'La hoja rozaba el marco',
+    location: 'Almacén · Acceso principal', floor: 1, priority: 'High', reportedBy: 'Pedro Aliaga',
+    createdAt: new Date('2026-10-14T07:45:00-05:00'), closedAt: new Date('2026-10-14T09:00:00-05:00'),
+  },
+] satisfies import('../src/shared/infrastructure/persistence/prisma/generated/client.js').Prisma.GeneralServicesIncidentCreateManyInput[]
+
 try {
   const users = await Promise.all(profiles.map(async ({ password, ...profile }) => ({
     ...profile, passwordHash: await hashDemoPassword(password),
@@ -61,8 +94,9 @@ try {
     prisma.operationalStation.createMany({ data: stations, skipDuplicates: true }),
     prisma.maintenanceRecord.createMany({ data: maintenance, skipDuplicates: true }),
     prisma.demoUser.createMany({ data: users, skipDuplicates: true }),
+    prisma.generalServicesIncident.createMany({ data: generalServicesIncidents, skipDuplicates: true }),
   ])
-  console.log('Datos ficticios de Referencias Operativas y perfiles de demo cargados.')
+  console.log('Datos ficticios de Referencias Operativas, perfiles e incidentes técnicos cargados.')
 } finally {
   await prisma.$disconnect()
 }

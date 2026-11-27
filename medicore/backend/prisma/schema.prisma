@@ -107,3 +107,27 @@ model ITAlert {
   @@index([reporterId, createdAt])
   @@map("it_alerts")
 }
+
+enum GeneralServicesPriority {
+  Critical
+  High
+  Medium
+  Low
+}
+
+model GeneralServicesIncident {
+  id           String                  @id
+  title        String
+  incidentType String
+  description  String
+  symptom      String
+  location     String
+  floor        Int
+  priority     GeneralServicesPriority
+  reportedBy   String
+  createdAt    DateTime
+  closedAt     DateTime?
+
+  @@index([closedAt])
+  @@map("general_services_incidents")
+}

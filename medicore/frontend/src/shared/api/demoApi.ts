@@ -5,6 +5,7 @@ const profiles: Partial<Record<UserRole, { userId: string; password: string }>> 
   biomedical: { userId: 'biomedica', password: 'medicore-demo-md' },
   admissions: { userId: 'admision', password: 'medicore-demo-jr' },
   'it-support': { userId: 'soporte-ti', password: 'medicore-demo-ds' },
+  'general-services': { userId: 'servicios-generales', password: 'medicore-demo-sg' },
 }
 
 interface DemoSession {

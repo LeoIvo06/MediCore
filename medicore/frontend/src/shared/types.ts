@@ -1,7 +1,7 @@
 export type UserRole = 'nursing' | 'admissions' | 'general-services' | 'it-support' | 'biomedical'
 export type Priority = 'Crítica' | 'Alta' | 'Media' | 'Baja'
-export type IncidentStatus = 'Pendiente' | 'Confirmada' | 'Nueva'
-export type IncidentKind = 'equipo-medico' | 'alerta-ti'
+export type IncidentStatus = 'Pendiente' | 'Confirmada' | 'Nueva' | 'Cerrada'
+export type IncidentKind = 'equipo-medico' | 'alerta-ti' | 'tecnico'
 
 export interface Incident {
   id: string; kind: IncidentKind; title: string; description: string; priority: Priority
@@ -10,7 +10,7 @@ export interface Incident {
   createdAt: string; symptom?: string; equipmentId?: string; stationId?: string; ip?: string; acknowledgedAt?: string
 }
 export interface Equipment { id: string; name: string; category: string; location: string; assetCode: string; brand: string; model: string }
-export interface DemoState { incidents: Incident[]; activeRole: UserRole }
+export interface DemoState { activeRole: UserRole }
 export const roleLabels: Record<UserRole, { name: string; title: string; initials: string }> = {
   nursing: { name: 'Carmen Mendoza', title: 'Enfermera asistencial', initials: 'CM' },
   admissions: { name: 'Jorge Ramírez', title: 'Encargado de Admisión', initials: 'JR' },

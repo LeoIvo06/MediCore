@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { DemoState, UserRole } from '../../shared/types'
-import { loadDemoState, saveDemoState, setRole } from '../api/demoRepository'
+import { loadDemoState, saveDemoState } from '../api/demoRepository'
 
 interface IncidentContextValue {
   state: DemoState
@@ -13,7 +13,7 @@ export function IncidentProvider({ children }: { children: ReactNode }) {
   useEffect(() => saveDemoState(state), [state])
   const value = useMemo<IncidentContextValue>(() => ({
     state,
-    updateRole: (role) => setState((current) => setRole(current, role)),
+    updateRole: (role) => setState({ activeRole: role }),
   }), [state])
   return <IncidentContext.Provider value={value}>{children}</IncidentContext.Provider>
 }

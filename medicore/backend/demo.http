@@ -4,6 +4,7 @@
 @admisionToken = PEGA_EL_TOKEN_DE_ADMISION
 @biomedicaToken = PEGA_EL_TOKEN_DE_BIOMEDICA
 @soporteToken = PEGA_EL_TOKEN_DE_SOPORTE_TI
+@serviciosToken = PEGA_EL_TOKEN_DE_SERVICIOS_GENERALES
 @alertId = PEGA_EL_ID_DE_LA_ALERTA
 
 ### Estado de la API y PostgreSQL · 200
@@ -111,3 +112,24 @@ Authorization: Bearer {{admisionToken}}
 ### Consultar el acuse con un perfil ajeno · 403
 GET {{host}}/api/alertas-ti/{{alertId}}
 Authorization: Bearer {{biomedicaToken}}
+
+### Iniciar sesión como Servicios Generales · 201
+POST {{host}}/api/sesiones-demo
+Content-Type: application/json
+
+{ "userId": "servicios-generales", "password": "medicore-demo-sg" }
+
+### Incidentes activos por piso · 200
+GET {{host}}/api/servicios-generales/incidencias
+Authorization: Bearer {{serviciosToken}}
+
+### Detalle técnico · 200
+GET {{host}}/api/servicios-generales/incidencias/INC-2026-0141
+Authorization: Bearer {{serviciosToken}}
+
+### Bandeja sin sesión · 401
+GET {{host}}/api/servicios-generales/incidencias
+
+### Detalle técnico con perfil ajeno · 403
+GET {{host}}/api/servicios-generales/incidencias/INC-2026-0141
+Authorization: Bearer {{soporteToken}}

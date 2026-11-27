@@ -1,4 +1,7 @@
 import express from 'express'
+import { GeneralServicesIncidentQueryService } from './incidencias/application/internal/queryservices/GeneralServicesIncidentQueryService.js'
+import { GeneralServicesIncidentRepositoryAdapter } from './incidencias/infrastructure/persistence/prisma/adapters/GeneralServicesIncidentRepositoryAdapter.js'
+import { createGeneralServicesIncidentsController } from './incidencias/interfaces/rest/GeneralServicesIncidentsController.js'
 import { ITAlertCommandService } from './incidencias/application/internal/commandservices/ITAlertCommandService.js'
 import { ITAlertQueryService } from './incidencias/application/internal/queryservices/ITAlertQueryService.js'
 import { ITAlertRepositoryAdapter } from './incidencias/infrastructure/persistence/prisma/adapters/ITAlertRepositoryAdapter.js'
@@ -48,6 +51,8 @@ export function createApp(prisma: PrismaClient) {
   app.use('/api', createITAlertsController(
     new ITAlertCommandService(externalReferences, alerts), new ITAlertQueryService(alerts), requireRole,
   ))
+  const generalServices = new GeneralServicesIncidentQueryService(new GeneralServicesIncidentRepositoryAdapter(prisma))
+  app.use('/api/servicios-generales', createGeneralServicesIncidentsController(generalServices, requireRole))
   app.use(globalExceptionHandler)
   return app
 }
