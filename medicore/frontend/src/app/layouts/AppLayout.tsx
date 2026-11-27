@@ -1,6 +1,6 @@
 import { Bell, ChevronDown, ClipboardList, Home, MapPin, Menu, Moon, PlusCircle, Stethoscope, Sun, UserRound } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import { NavLink, Outlet, useLocation } from 'react-router-dom'
+import { NavLink, Outlet, useLocation, useMatches, useNavigate } from 'react-router-dom'
 import { roleLabels, type UserRole } from '../../shared/types'
 import { MediCoreBrand, MediCoreLaunch } from '../../shared/MediCoreBrand'
 import { useIncidents } from '../../incidencias/context/IncidentContext'
@@ -11,6 +11,12 @@ const roleOptions: { value: UserRole; label: string }[] = [
   { value: 'general-services', label: 'Servicios Generales' }, { value: 'it-support', label: 'Soporte TI' },
   { value: 'biomedical', label: 'Ingeniería Biomédica' },
 ]
+
+interface NavigationHandle {
+  roles?: readonly UserRole[]
+  detailRoles?: (id: string) => readonly UserRole[] | undefined
+  title?: string
+}
 
 const launchKey = 'medicore-launch-seen'
 
@@ -36,6 +42,9 @@ export default function AppLayout() {
   const [activeMenu, setActiveMenu] = useState<'navigation' | 'profile' | 'notifications' | null>(null)
   const [dark, setDark] = useState(() => document.documentElement.dataset.theme === 'dark')
   const location = useLocation()
+  const navigate = useNavigate()
+  const match = useMatches().at(-1)
+  const handle = match?.handle as NavigationHandle | undefined
   const headerRef = useRef<HTMLElement>(null)
   const navigationTrigger = useRef<HTMLButtonElement>(null)
   const profileTrigger = useRef<HTMLButtonElement>(null)
@@ -73,6 +82,16 @@ export default function AppLayout() {
     }
   }
 
+  function selectRole(role: UserRole) {
+    if (role !== state.activeRole) {
+      const allowedRoles = handle?.roles ?? handle?.detailRoles?.(match?.params.id ?? '')
+      updateRole(role)
+      if (allowedRoles && !allowedRoles.includes(role)) void navigate('/', { replace: true })
+    }
+    setActiveMenu(null)
+    profileTrigger.current?.focus()
+  }
+
   const profile = roleLabels[state.activeRole]
   const items = [
     { to: '/', label: 'Inicio', icon: Home },
@@ -81,7 +100,8 @@ export default function AppLayout() {
     ...(['general-services', 'it-support', 'biomedical'].includes(state.activeRole) ? [{ to: '/bandeja', label: state.activeRole === 'biomedical' ? 'Bandeja biomédica' : 'Lista de incidentes', icon: ClipboardList }] : []),
     ...(state.activeRole === 'biomedical' ? [{ to: '/equipos/eq-vent-00123', label: 'Ficha técnica', icon: Stethoscope }] : []),
   ]
-  const pageLabel = items.find((item) => item.to === location.pathname)?.label ??
+  const pageLabel = handle?.title ??
+    items.find((item) => item.to === (location.pathname === '/demo' ? '/' : location.pathname))?.label ??
     (location.pathname.startsWith('/incidentes/') ? 'Detalle del incidente'
       : location.pathname.startsWith('/equipos/') ? 'Ficha técnica' : 'Incidencias')
 
@@ -158,7 +178,7 @@ export default function AppLayout() {
                   <button
                     type="button"
                     key={role.value}
-                    onClick={() => { updateRole(role.value); setActiveMenu(null); profileTrigger.current?.focus() }}
+                    onClick={() => selectRole(role.value)}
                     aria-pressed={state.activeRole === role.value}
                     className={"block min-h-11 w-full rounded-md px-3 py-2 text-left text-sm hover:bg-slate-50 " + (state.activeRole === role.value ? 'font-semibold text-accent' : 'text-ink')}
                   >
