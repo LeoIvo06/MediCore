@@ -6,6 +6,7 @@ import { demoApi, DemoApiError } from '../../shared/api/demoApi'
 import { useDemoQuery } from '../../shared/api/useDemoQuery'
 import type { Incident, UserRole } from '../../shared/types'
 import { acknowledgeITAlert } from '../api/itAlerts'
+import { IncidentTimeline } from '../components/IncidentTimeline'
 import { ITDiagnosisCard } from '../components/ITDiagnosisCard'
 import { useIncidents } from '../context/IncidentContext'
 import { getIncidentDetailRoute } from '../utils/incidentDetailRoute'
@@ -71,9 +72,10 @@ function IncidentView({ initial, role, endpoint }: { initial: Incident; role: Us
 
   return <>
     <div className="mb-3"><IncidentBackLink role={role} /></div>
-    <PageTitle title={incident.title} description={`Registrado ${new Date(incident.createdAt).toLocaleString('es-PE')} por ${incident.reportedBy}`} action={<div className="flex items-center gap-2"><PriorityBadge priority={incident.priority} /><StatusBadge status={incident.status} /></div>} />
+    <PageTitle title={incident.title} action={<div className="flex items-center gap-2"><PriorityBadge priority={incident.priority} /><StatusBadge status={incident.status} /></div>} />
     <div className="grid gap-5 xl:grid-cols-[minmax(0,1.7fr)_minmax(280px,0.8fr)]">
       <div className="space-y-5"><Card className="p-5 sm:p-6"><h2 className="border-b border-line pb-3 font-semibold">Información del reporte</h2><dl className="mt-4 grid gap-x-8 gap-y-5 sm:grid-cols-2"><div className="sm:col-span-2"><dt className="text-xs text-muted">Descripción</dt><dd className="mt-1 text-sm leading-6">{incident.description}</dd></div><div><dt className="text-xs text-muted">ID del incidente</dt><dd className="mt-1 font-mono text-sm">{incident.id}</dd></div><div><dt className="text-xs text-muted">Área responsable</dt><dd className="mt-1 text-sm">{incident.area}</dd></div><div><dt className="text-xs text-muted">Síntoma reportado</dt><dd className="mt-1 text-sm">{incident.symptom ?? 'No especificado'}</dd></div><div><dt className="text-xs text-muted">Ubicación exacta</dt><dd className="mt-1 flex items-center gap-1.5 text-sm"><MapPin size={15} className="text-accent" />{incident.location}</dd></div>{incident.stationId && <><div><dt className="text-xs text-muted">Estación</dt><dd className="mt-1 text-sm">{incident.stationId}</dd></div>{incident.ip && <div><dt className="text-xs text-muted">Dirección IP</dt><dd className="mt-1 font-mono text-sm">{incident.ip}</dd></div>}</>}{incident.incidentType && <div><dt className="text-xs text-muted">{incident.kind === 'tecnico' ? 'Tipo de problema' : 'Tipo de falla'}</dt><dd className="mt-1 text-sm">{incident.incidentType}</dd></div>}</dl></Card>
+        <IncidentTimeline incident={incident} />
         {isAlert && (incident.diagnosis || (role === 'it-support' && incident.open && incident.stationId)) && (
           <ITDiagnosisCard incident={incident} canEdit={role === 'it-support' && Boolean(incident.open && incident.stationId)}
             blocked={pending !== null} onSaving={setSavingDiagnosis} onSaved={setUpdated} />
@@ -87,9 +89,7 @@ function IncidentView({ initial, role, endpoint }: { initial: Incident; role: Us
           </button>
         )}
         {actionError && <p role="alert" className="mt-3 text-sm text-red-600">{actionError}</p>}
-        {incident.resolvedAt && <p className="mt-3 text-sm text-muted">Resuelto el {new Date(incident.resolvedAt).toLocaleString('es-PE')}</p>}
         {isAlert && incident.open && <p className="mt-3 text-xs text-muted">El incidente sigue abierto.</p>}
-        {incident.acknowledgedAt && <div className="mt-4 rounded-lg bg-emerald-50 p-3 text-xs text-emerald-800"><span className="font-semibold">Acuse registrado</span><br />{new Date(incident.acknowledgedAt).toLocaleString('es-PE')}</div>}
         <div className="mt-5 rounded-lg bg-slate-50 p-3 text-xs leading-5 text-muted"><span className="font-semibold text-ink">Prioridad inicial:</span> {isAlert ? 'Crítica, asignada por regla de dominio para alertas de TI.' : incident.priority}</div>
       </Card>
     </div>

@@ -46,7 +46,6 @@ export function ITDiagnosisCard({ incident, canEdit, blocked, onSaving, onSaved 
       <p className="font-semibold">{diagnosis.responded ? 'La estación respondió' : 'La estación no respondió'}</p>
       <p className="mt-1 whitespace-pre-wrap break-words">{diagnosis.summary}</p>
       {!diagnosis.responded && <p className="mt-2 font-semibold text-accent">Siguiente acción: revisión presencial.</p>}
-      <p className="mt-2 text-xs text-muted">{diagnosis.author} · {new Date(diagnosis.recordedAt).toLocaleString('es-PE')}</p>
     </div>}
     {canEdit && <form onSubmit={(event) => void submit(event)} className="mt-4 space-y-4">
       <Field label="Resultado de la estación">
