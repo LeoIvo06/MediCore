@@ -24,6 +24,6 @@ Para generar la versión de producción: `npm run build`. El proyecto fue creado
 
 ## Estado de integración
 
-El frontend usa datos de demostración guardados en `localStorage` para poder recorrer los flujos antes de implementar el backend. La [base del backend](backend/README.md) incluye Express, Prisma y PostgreSQL en Docker. La API de esta etapa comprueba la conexión; los endpoints y permisos de las historias se integrarán en los siguientes bloques.
+El frontend usa datos de demostración guardados en `localStorage` para poder recorrer los flujos antes de implementar el backend. La [base del backend](backend/README.md) incluye Express, Prisma y PostgreSQL en Docker. La API comprueba la conexión, valida sesiones de demo y sirve los catálogos con permisos por perfil. Los flujos de incidencias se integrarán en los siguientes bloques.
 
 Perfiles de prueba: Enfermería, Admisión, Servicios Generales, Soporte TI e Ingeniería Biomédica. Los datos son ficticios.

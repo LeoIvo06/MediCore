@@ -14,8 +14,10 @@
     "prebuild": "npm run generate",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/server.js",
+    "test": "tsx --test test/ArchitectureTest.ts test/IncidentAccessPolicyTest.ts",
     "db:migrate": "prisma migrate deploy",
-    "db:status": "prisma migrate status"
+    "db:status": "prisma migrate status",
+    "db:seed": "prisma db seed"
   },
   "dependencies": {
     "@prisma/adapter-pg": "7.8.0",

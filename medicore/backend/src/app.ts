@@ -1,10 +1,36 @@
 import express from 'express'
+import { ExternalOperationalReferencesService } from './incidencias/application/internal/outboundservices/acl/ExternalOperationalReferencesService.js'
+import { ReportOptionsQueryService } from './incidencias/application/internal/queryservices/ReportOptionsQueryService.js'
+import { createReportOptionsController } from './incidencias/interfaces/rest/ReportOptionsController.js'
+import { OperationalReferencesQueryService } from './referencias-operativas/application/internal/queryservices/OperationalReferencesQueryService.js'
+import { OperationalReferencesRepositoryAdapter } from './referencias-operativas/infrastructure/persistence/prisma/adapters/OperationalReferencesRepositoryAdapter.js'
+import { OperationalReferencesContextFacade } from './referencias-operativas/interfaces/acl/OperationalReferencesContextFacade.js'
+import { createOperationalReferencesController } from './referencias-operativas/interfaces/rest/OperationalReferencesController.js'
+import { DemoAuthService } from './shared/application/security/DemoAuthService.js'
+import { DemoCredentialRepository } from './shared/infrastructure/persistence/prisma/DemoCredentialRepository.js'
+import type { PrismaClient } from './shared/infrastructure/persistence/prisma/generated/client.js'
+import { matchesDemoPassword } from './shared/infrastructure/security/DemoPassword.js'
+import { createDemoAuthorization } from './shared/interfaces/rest/DemoAuthorization.js'
+import { createDemoSessionController } from './shared/interfaces/rest/DemoSessionController.js'
+import { globalExceptionHandler } from './shared/interfaces/rest/GlobalExceptionHandler.js'
 import { createHealthController } from './shared/interfaces/rest/HealthController.js'
 
-export function createApp(checkDatabase: () => Promise<void>) {
+export function createApp(prisma: PrismaClient) {
   const app = express()
   app.disable('x-powered-by')
-  app.use(express.json())
-  app.use('/api', createHealthController(checkDatabase))
+  app.use(express.json({ limit: '16kb' }))
+
+  const users = new DemoCredentialRepository(prisma)
+  const auth = new DemoAuthService((id) => users.findById(id), matchesDemoPassword)
+  const requireRole = createDemoAuthorization(auth)
+  const references = new OperationalReferencesQueryService(new OperationalReferencesRepositoryAdapter(prisma))
+  const facade = new OperationalReferencesContextFacade(references)
+  const reportOptions = new ReportOptionsQueryService(new ExternalOperationalReferencesService(facade))
+
+  app.use('/api', createHealthController(async () => { await prisma.$queryRaw`SELECT 1` }))
+  app.use('/api', createDemoSessionController(auth, requireRole))
+  app.use('/api/referencias', createOperationalReferencesController(references, requireRole))
+  app.use('/api/incidencias', createReportOptionsController(reportOptions, requireRole))
+  app.use(globalExceptionHandler)
   return app
 }

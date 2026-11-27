@@ -1,0 +1,53 @@
+# Bloque 2 · Ejecuta los inicios de sesión y copia cada token debajo.
+@host = http://127.0.0.1:3001
+@enfermeriaToken = PEGA_EL_TOKEN_DE_ENFERMERIA
+@admisionToken = PEGA_EL_TOKEN_DE_ADMISION
+@biomedicaToken = PEGA_EL_TOKEN_DE_BIOMEDICA
+
+### Estado de la API y PostgreSQL · 200
+GET {{host}}/api/health
+
+### Sesión de Enfermería · 201
+POST {{host}}/api/sesiones-demo
+Content-Type: application/json
+
+{ "userId": "enfermeria", "password": "medicore-demo-cm" }
+
+### Sesión de Admisión · 201
+POST {{host}}/api/sesiones-demo
+Content-Type: application/json
+
+{ "userId": "admision", "password": "medicore-demo-jr" }
+
+### Sesión de Biomédica · 201
+POST {{host}}/api/sesiones-demo
+Content-Type: application/json
+
+{ "userId": "biomedica", "password": "medicore-demo-md" }
+
+### Opciones que Incidencias consulta por la fachada de Referencias Operativas · 200
+GET {{host}}/api/incidencias/opciones-reporte
+Authorization: Bearer {{enfermeriaToken}}
+
+### Opciones sin sesión · 401
+GET {{host}}/api/incidencias/opciones-reporte
+
+### Opciones con perfil de Admisión · 403
+GET {{host}}/api/incidencias/opciones-reporte
+Authorization: Bearer {{admisionToken}}
+
+### Estación completa · 200
+GET {{host}}/api/referencias/estaciones/ADM-01
+Authorization: Bearer {{admisionToken}}
+
+### Estación sin IP ni ubicación · 200 con ambas propiedades null
+GET {{host}}/api/referencias/estaciones/ADM-04
+Authorization: Bearer {{admisionToken}}
+
+### Ficha e historial del equipo · 200
+GET {{host}}/api/referencias/equipos/eq-vent-00123
+Authorization: Bearer {{biomedicaToken}}
+
+### Equipo inexistente · 404
+GET {{host}}/api/referencias/equipos/no-existe
+Authorization: Bearer {{biomedicaToken}}

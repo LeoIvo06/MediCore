@@ -1,6 +1,6 @@
 # Backend de MediCore
 
-Express y TypeScript para la API, Prisma para persistencia y PostgreSQL 17 en Docker Compose. El bloque 1 crea la tabla de ubicaciones de Referencias Operativas y expone `GET /api/health` para comprobar la conexión.
+Express y TypeScript para la API, Prisma para persistencia y PostgreSQL 17 en Docker Compose. El backend ofrece los catálogos de Referencias Operativas, sesiones de demo y `GET /api/health` para comprobar la conexión.
 
 ## Arranque local
 
@@ -32,3 +32,29 @@ Como en ULima Market, cada bounded context se organiza por capas dentro de su pr
 | `infrastructure/persistence/prisma/adapters` | Adaptadores de repositorio y conversión entre dominio y persistencia. |
 | `interfaces/rest`, `interfaces/rest/resources`, `interfaces/rest/transform` | Controladores, contratos HTTP y conversión entre HTTP y dominio. |
 | `interfaces/acl` | Fachada pública de Referencias Operativas para las consultas de Incidencias. |
+
+## Referencias Operativas y sesiones de demo
+
+Con la base activa, aplica la migración, genera el cliente y carga los datos ficticios:
+
+```powershell
+npm.cmd run db:migrate
+npm.cmd run generate
+npm.cmd run db:seed
+npm.cmd test
+npm.cmd run dev
+```
+
+El seed se puede repetir y conserva los registros existentes. Las cuentas de prueba son ficticias y las sesiones duran una hora en la instancia de Express.
+
+| Usuario | Perfil | Contraseña de demo |
+| --- | --- | --- |
+| `enfermeria` | Enfermería | `medicore-demo-cm` |
+| `admision` | Admisión | `medicore-demo-jr` |
+| `servicios-generales` | Servicios Generales | `medicore-demo-sg` |
+| `soporte-ti` | Soporte TI | `medicore-demo-ds` |
+| `biomedica` | Ingeniería Biomédica | `medicore-demo-md` |
+
+Usa [demo.http](demo.http) para iniciar sesión y probar los catálogos, las estaciones, las fichas y los rechazos por permiso. El [contrato API](../docs/api/README.md) indica el perfil habilitado en cada ruta.
+
+Incidencias usa `ExternalOperationalReferencesService` desde `application/internal/outboundservices/acl` y Referencias Operativas publica `OperationalReferencesContextFacade` en `interfaces/acl`. La prueba `ArchitectureTest` verifica este límite, la dirección de la dependencia y la separación de Prisma respecto del dominio.

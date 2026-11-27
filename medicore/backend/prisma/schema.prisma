@@ -11,9 +11,66 @@ datasource db {
 
 /// Catálogo de ubicaciones del contexto Referencias Operativas.
 model OperationalLocation {
-  id    String @id
-  label String
-  floor Int
+  id        String                 @id
+  label     String
+  floor     Int
+  equipment OperationalEquipment[]
 
   @@map("operational_locations")
+}
+
+model OperationalEquipment {
+  id              String              @id
+  name            String
+  category        String
+  brand           String
+  model           String
+  assetCode       String              @unique
+  location        String
+  locationId      String
+  catalogLocation OperationalLocation @relation(fields: [locationId], references: [id])
+  maintenance     MaintenanceRecord[]
+
+  @@index([locationId])
+  @@map("operational_equipment")
+}
+
+model OperationalSymptom {
+  id    String @id
+  label String @unique
+
+  @@map("operational_symptoms")
+}
+
+model OperationalStation {
+  id       String  @id
+  label    String
+  location String?
+  floor    Int
+  ip       String?
+
+  @@map("operational_stations")
+}
+
+model MaintenanceRecord {
+  id          String               @id
+  equipmentId String
+  date        DateTime             @db.Date
+  type        String
+  details     String
+  technician  String
+  status      String
+  equipment   OperationalEquipment @relation(fields: [equipmentId], references: [id])
+
+  @@index([equipmentId, date])
+  @@map("maintenance_records")
+}
+
+model DemoUser {
+  id           String @id
+  name         String
+  role         String
+  passwordHash String
+
+  @@map("demo_users")
 }
