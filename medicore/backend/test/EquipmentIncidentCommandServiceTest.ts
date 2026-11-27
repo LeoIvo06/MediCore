@@ -10,9 +10,10 @@ import { OperationalReferencesContextFacade } from '../src/referencias-operativa
 function setup() {
   const writes: EquipmentIncidentDraft[] = []
   const repository: EquipmentIncidentRepository = {
+    async resolve() { return null },
     async create(draft) {
       writes.push(draft)
-      return { ...draft, number: 1, createdAt: new Date('2026-11-26T00:00:00Z') }
+      return { ...draft, number: 1, createdAt: new Date('2026-11-26T00:00:00Z'), resolvedAt: null }
     },
     async findByNumber() { return null },
     async list() { return [] },

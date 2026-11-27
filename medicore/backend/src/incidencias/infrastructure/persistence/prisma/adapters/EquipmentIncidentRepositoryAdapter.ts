@@ -7,6 +7,16 @@ import { recordIncidentNotifications } from './recordIncidentNotifications.js'
 export class EquipmentIncidentRepositoryAdapter implements EquipmentIncidentRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
+  async resolve(number: number) {
+    const [, incident] = await this.prisma.$transaction([
+      this.prisma.equipmentIncident.updateMany({
+        where: { number, resolvedAt: null }, data: { resolvedAt: new Date() },
+      }),
+      this.prisma.equipmentIncident.findUnique({ where: { number } }),
+    ])
+    return incident
+  }
+
   create(draft: EquipmentIncidentDraft) {
     return this.prisma.$transaction(async (transaction) => {
       const incident = await transaction.equipmentIncident.create({ data: draft })

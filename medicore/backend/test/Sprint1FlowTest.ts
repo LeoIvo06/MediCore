@@ -21,7 +21,7 @@ test('Sprint 1: las siete historias se ejercitan por HTTP y los datos sobreviven
   const start = async (url: string) => {
     let closed = false
     const prisma = createPrismaClient(url)
-    const server = createApp(prisma).listen(0, '127.0.0.1')
+    const server = createApp(prisma, url).listen(0, '127.0.0.1')
     await once(server, 'listening')
     return {
       api: `http://127.0.0.1:${(server.address() as AddressInfo).port}/api`,
@@ -65,6 +65,8 @@ test('Sprint 1: las siete historias se ejercitan por HTTP y los datos sobreviven
     ip?: string
     acknowledgedAt?: string
     open?: boolean
+    status: string
+    resolvedAt?: string
   }
   const equipmentPath = '/incidencias/equipos'
   const alertPath = '/alertas-ti'
@@ -89,10 +91,24 @@ test('Sprint 1: las siete historias se ejercitan por HTTP y los datos sobreviven
     assert.deepEqual(incomplete.fields, ['equipmentId', 'symptomId'])
     assert.deepEqual(await request(equipmentPath, 200, biomedical), [])
 
-    const report = await request<Ticket>(equipmentPath, 201, nursing, 'POST', {
-      equipmentId: 'eq-monitor-04567', locationId: 'emergencia-1', symptomId: 'no-enciende',
-    })
-    equipmentId = report.id
+    const subscription = new AbortController()
+    try {
+      const stream = await fetch(server.api + '/notificaciones/eventos', {
+        headers: { Authorization: `Bearer ${biomedical}` },
+        signal: AbortSignal.any([subscription.signal, AbortSignal.timeout(10_000)]),
+      })
+      assert.equal(stream.status, 200)
+      assert.match(stream.headers.get('content-type') ?? '', /^text\/event-stream/)
+      const reader = stream.body!.pipeThrough(new TextDecoderStream()).getReader()
+      assert.match((await reader.read()).value ?? '', /data: ready/)
+      const report = await request<Ticket>(equipmentPath, 201, nursing, 'POST', {
+        equipmentId: 'eq-monitor-04567', locationId: 'emergencia-1', symptomId: 'no-enciende',
+      })
+      equipmentId = report.id
+      assert.match((await reader.read()).value ?? '', /data: update/)
+    } finally {
+      subscription.abort()
+    }
     assert.match(equipmentId, /^INC-EQ-\d+$/)
     const list = await request<Ticket[]>(equipmentPath, 200, biomedical)
     assert.deepEqual(list.map(({ id }) => id), [equipmentId])
@@ -188,6 +204,33 @@ test('Sprint 1: las siete historias se ejercitan por HTTP y los datos sobreviven
     assert.equal((await request<Notice[]>(notificationPath, 200, nursing))[0].readAt, null)
   })
 
+  const generalId = 'INC-2026-0141'
+  await t.test('solo el área responsable resuelve y la bandeja conserva el nuevo estado', async () => {
+    const operations = [
+      [equipmentPath, equipmentId, biomedical, nursing],
+      [alertPath, alertId, support, admissions],
+      [generalPath, generalId, general, support],
+    ] as const
+    for (const [path, id, owner, reporter] of operations) {
+      const endpoint = `${path}/${id}/resolucion`
+      await request(endpoint, 401, undefined, 'PUT')
+      await request(endpoint, 403, reporter, 'PUT')
+      const results = await Promise.all(Array.from({ length: 2 }, () => request<Ticket>(endpoint, 200, owner, 'PUT')))
+      assert.ok(results[0].resolvedAt)
+      for (const result of results) {
+        assert.equal(result.status, 'Resuelto')
+        assert.equal(result.open, false)
+        assert.equal(result.resolvedAt, results[0].resolvedAt)
+      }
+    }
+    assert.equal((await request<Ticket[]>(equipmentPath, 200, biomedical)).find(({ id }) => id === equipmentId)?.status, 'Resuelto')
+    assert.equal((await request<Ticket[]>(itPath, 200, support)).find(({ id }) => id === alertId)?.status, 'Resuelto')
+    const all = await request<{ incidents: Ticket[] }[]>(generalPath + '?incluirResueltos=1', 200, general)
+    assert.equal(all.flatMap(({ incidents }) => incidents).find(({ id }) => id === generalId)?.status, 'Resuelto')
+    const active = await request<{ incidents: Ticket[] }[]>(generalPath, 200, general)
+    assert.equal(active.flatMap(({ incidents }) => incidents).some(({ id }) => id === generalId), false)
+  })
+
   await t.test('las sesiones, el reporte y el primer acuse sobreviven a la recreación de PostgreSQL', async () => {
     await server.close()
     const args = composeArgs(project)
@@ -201,7 +244,9 @@ test('Sprint 1: las siete historias se ejercitan por HTTP y los datos sobreviven
     const alert = await request<Ticket>(`${alertPath}/${alertId}`, 200, admissions)
     await request(`${alertPath}/${alertId}`, 403, biomedical)
     assert.equal(alert.acknowledgedAt, acknowledgedAt)
-    assert.equal(alert.open, true)
+    assert.equal(alert.open, false)
+    assert.equal(alert.status, 'Resuelto')
+    assert.equal((await request<Ticket>(`${generalPath}/${generalId}`, 200, general)).status, 'Resuelto')
     assert.ok((await request<Notice[]>(notificationPath, 200, biomedical))[0].readAt)
     assert.equal((await request<Notice[]>(notificationPath, 200, nursing))[0].readAt, null)
   })

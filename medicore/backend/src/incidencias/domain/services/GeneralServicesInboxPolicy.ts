@@ -2,9 +2,9 @@ import type { GeneralServicesIncident, GeneralServicesPriority } from '../model/
 
 const rank: Record<GeneralServicesPriority, number> = { Critical: 4, High: 3, Medium: 2, Low: 1 }
 
-export function groupActiveIncidentsByFloor(incidents: readonly GeneralServicesIncident[]) {
+export function groupActiveIncidentsByFloor(incidents: readonly GeneralServicesIncident[], includeResolved = false) {
   const ordered = incidents
-    .filter((incident) => incident.closedAt === null)
+    .filter((incident) => includeResolved || incident.closedAt === null)
     .sort((a, b) => a.floor - b.floor || rank[b.priority] - rank[a.priority] ||
       a.createdAt.getTime() - b.createdAt.getTime() || a.id.localeCompare(b.id))
 

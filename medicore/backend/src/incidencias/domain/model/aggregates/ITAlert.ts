@@ -11,6 +11,7 @@ export interface ITAlert extends ITAlertDraft {
   number: number
   createdAt: Date
   acknowledgedAt: Date | null
+  resolvedAt: Date | null
 }
 
 export function itAlertId(number: number) {

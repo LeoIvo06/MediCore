@@ -18,7 +18,7 @@ export function PriorityBadge({ priority }: { priority: Priority }) {
 }
 
 export function StatusBadge({ status }: { status: string }) {
-  const confirmed = status === 'Confirmada'
+  const confirmed = status === 'Confirmada' || status === 'Resuelto'
   return <span className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-medium ${confirmed ? 'bg-emerald-100 text-emerald-700' : 'bg-sky-100 text-sky-700'}`}><span className={`h-1.5 w-1.5 rounded-full ${confirmed ? 'bg-emerald-600' : 'bg-sky-600'}`} />{status}</span>
 }
 

@@ -14,8 +14,12 @@ const areaRoles: Record<IncidentArea, DemoRole> = {
   Biomédica: 'biomedical',
 }
 
+export function canResolveIncident(actor: DemoPrincipal, area: IncidentArea): boolean {
+  return actor.role === areaRoles[area]
+}
+
 export function canReadIncident(actor: DemoPrincipal, incident: IncidentAccessScope): boolean {
-  return actor.role === areaRoles[incident.area] ||
+  return canResolveIncident(actor, incident.area) ||
     ((actor.role === 'nursing' || actor.role === 'admissions') && actor.id === incident.reporterId)
 }
 

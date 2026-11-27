@@ -57,5 +57,11 @@ export function createITAlertsController(commands: ITAlertCommandService, querie
     sendResult(response, result)
   })
 
+  router.put<{ id: string }>('/alertas-ti/:id/resolucion', requireRole('it-support'), async (request, response) => {
+    const number = alertNumber(request.params.id)
+    const result = number === null ? { status: 'missing' as const } : await commands.resolve(number, response.locals.principal)
+    sendResult(response, result)
+  })
+
   return router
 }

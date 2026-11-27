@@ -7,6 +7,16 @@ import { recordIncidentNotifications } from './recordIncidentNotifications.js'
 export class ITAlertRepositoryAdapter implements ITAlertRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
+  async resolve(number: number) {
+    const [, incident] = await this.prisma.$transaction([
+      this.prisma.iTAlert.updateMany({
+        where: { number, resolvedAt: null }, data: { resolvedAt: new Date() },
+      }),
+      this.prisma.iTAlert.findUnique({ where: { number } }),
+    ])
+    return incident
+  }
+
   create(draft: ITAlertDraft) {
     return this.prisma.$transaction(async (transaction) => {
       const incident = await transaction.iTAlert.create({ data: draft })

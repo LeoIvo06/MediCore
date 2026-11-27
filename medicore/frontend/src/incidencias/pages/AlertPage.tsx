@@ -70,7 +70,7 @@ function ITAlertForm() {
       {history.data?.length === 0 && <p className="mt-2 text-sm text-muted">Aún no has enviado alertas.</p>}
       {history.data?.map((alert) => <div key={alert.id} className="mt-3 flex flex-wrap justify-between gap-2 text-sm">
         <Link className="font-semibold text-accent hover:underline" to={`/incidentes/${alert.id}`}>{alert.id} · {alert.stationId}</Link>
-        <span className="text-muted">{alert.acknowledgedAt ? 'Recepción confirmada' : 'Pendiente de acuse'}</span>
+        <span className="text-muted">{alert.status === 'Resuelto' ? alert.status : alert.acknowledgedAt ? 'Recepción confirmada' : 'Pendiente de acuse'}</span>
       </div>)}
     </Card>
   </>

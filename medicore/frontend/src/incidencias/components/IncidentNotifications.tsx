@@ -3,7 +3,9 @@ import { useEffect, useRef, useState, type RefObject } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { demoApi } from '../../shared/api/demoApi'
 import type { UserRole } from '../../shared/types'
-import { incidentCreatedEvent, incidentNotificationsPath, type IncidentNotification } from '../api/incidentNotifications'
+import { incidentCreatedEvent, incidentNotificationsPath, listenForNotifications, type IncidentNotification } from '../api/incidentNotifications'
+
+import { armNotificationSound, playNotificationSound } from '../api/notificationSound'
 
 const timeFormat = new Intl.DateTimeFormat('es-PE', { dateStyle: 'short', timeStyle: 'short' })
 
@@ -19,34 +21,88 @@ export function IncidentNotifications({ role, open, onToggle, onClose, trigger }
   const [loadError, setLoadError] = useState(false)
   const [readError, setReadError] = useState(false)
   const [opening, setOpening] = useState(false)
-  const [revision, setRevision] = useState(0)
+  const refreshNotifications = useRef<(() => void) | null>(null)
   const readRequest = useRef<AbortController | null>(null)
   const unread = items?.some((item) => !item.readAt) ?? false
 
   useEffect(() => {
     let request: AbortController | undefined
+    let stream: AbortController | undefined
+    let streamReady = false
+    let retry = 0
+    let newestSeen: string | undefined
+    const seen = new Set<string>()
     function refresh() {
       if (document.hidden) return
       request?.abort()
       const controller = new AbortController()
       request = controller
       demoApi<IncidentNotification[]>(role, incidentNotificationsPath, { signal: controller.signal }).then(
-        (data) => { if (!controller.signal.aborted) { setItems(data); setLoadError(false) } },
+        (data) => {
+          if (controller.signal.aborted) return
+          const previousNewest = newestSeen
+          if (previousNewest !== undefined && data.some(
+            (item) => !item.readAt && !seen.has(item.incidentId) && item.createdAt >= previousNewest,
+          )) playNotificationSound()
+          newestSeen ??= ''
+          for (const item of data) {
+            seen.add(item.incidentId)
+            if (item.createdAt > newestSeen) newestSeen = item.createdAt
+          }
+          setItems(data)
+          setLoadError(false)
+        },
         () => { if (!controller.signal.aborted) setLoadError(true) },
       )
     }
-
-    refresh()
-    const timer = window.setInterval(refresh, 8000)
-    document.addEventListener('visibilitychange', refresh)
-    window.addEventListener(incidentCreatedEvent, refresh)
-    return () => {
-      request?.abort()
-      window.clearInterval(timer)
-      document.removeEventListener('visibilitychange', refresh)
-      window.removeEventListener(incidentCreatedEvent, refresh)
+    function connect() {
+      if (document.hidden || stream) return
+      const controller = new AbortController()
+      stream = controller
+      void listenForNotifications(role, controller.signal, () => {
+        streamReady = true
+        refresh()
+      }).catch(() => {}).finally(() => {
+        if (stream !== controller) return
+        stream = undefined
+        streamReady = false
+        if (!controller.signal.aborted) retry = window.setTimeout(connect, 1200)
+      })
     }
-  }, [open, revision, role])
+    function onVisibilityChange() {
+      if (document.hidden) {
+        stream?.abort()
+        stream = undefined
+        streamReady = false
+        window.clearTimeout(retry)
+      } else {
+        refresh()
+        connect()
+      }
+    }
+
+    refreshNotifications.current = refresh
+    refresh()
+    connect()
+    const timer = window.setInterval(() => { if (!streamReady) refresh() }, 2000)
+    document.addEventListener('visibilitychange', onVisibilityChange)
+    window.addEventListener(incidentCreatedEvent, refresh)
+    document.addEventListener('click', armNotificationSound)
+    document.addEventListener('keydown', armNotificationSound)
+    return () => {
+      refreshNotifications.current = null
+      request?.abort()
+      stream?.abort()
+      window.clearInterval(timer)
+      window.clearTimeout(retry)
+      document.removeEventListener('visibilitychange', onVisibilityChange)
+      window.removeEventListener(incidentCreatedEvent, refresh)
+      document.removeEventListener('click', armNotificationSound)
+      document.removeEventListener('keydown', armNotificationSound)
+    }
+  }, [role])
+
+  useEffect(() => { if (open) refreshNotifications.current?.() }, [open])
 
   useEffect(() => () => readRequest.current?.abort(), [])
 
@@ -69,7 +125,7 @@ export function IncidentNotifications({ role, open, onToggle, onClose, trigger }
       }
       if (controller.signal.aborted) return
       setItems((current) => current?.map((item) => item.incidentId === notification.incidentId ? { ...item, readAt: new Date().toISOString() } : item) ?? null)
-      setRevision((value) => value + 1)
+      refreshNotifications.current?.()
     }
     onClose()
     navigate(`/incidentes/${encodeURIComponent(notification.incidentId)}`)

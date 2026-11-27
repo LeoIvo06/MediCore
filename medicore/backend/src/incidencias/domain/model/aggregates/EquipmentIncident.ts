@@ -13,6 +13,7 @@ export type EquipmentIncidentDraft = Readonly<{
 export type EquipmentIncident = EquipmentIncidentDraft & Readonly<{
   number: number
   createdAt: Date
+  resolvedAt: Date | null
 }>
 
 export function equipmentIncidentId(number: number) {

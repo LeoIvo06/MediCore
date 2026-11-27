@@ -2,11 +2,38 @@ import { Router } from 'express'
 import type { RequireDemoRole } from '../../../shared/interfaces/rest/DemoAuthorization.js'
 import type { IncidentNotificationService } from '../../application/internal/IncidentNotificationService.js'
 
-export function createIncidentNotificationsController(service: IncidentNotificationService, requireRole: RequireDemoRole) {
+type NotificationStream = (recipientId: string, signal: AbortSignal, ready: () => void, notify: () => void) => Promise<void>
+
+export function createIncidentNotificationsController(
+  service: IncidentNotificationService, requireRole: RequireDemoRole, stream?: NotificationStream,
+) {
   const router = Router()
 
   router.get('/', requireRole(), async (_request, response) => {
     response.json(await service.list(response.locals.principal.id))
+  })
+
+  router.get('/eventos', requireRole(), async (_request, response) => {
+    if (!stream) {
+      response.status(503).json({ error: 'Actualización en vivo no disponible.' })
+      return
+    }
+    const controller = new AbortController()
+    response.once('close', () => controller.abort())
+    const timer = setTimeout(() => controller.abort(), 22_000)
+    try {
+      await stream(response.locals.principal.id, controller.signal, () => {
+        response.set({ 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-store, no-transform' })
+        response.write('data: ready\n\n')
+      }, () => {
+        if (response.headersSent && !response.writableEnded && !controller.signal.aborted) response.write('data: update\n\n')
+      })
+    } catch {
+      if (!response.headersSent && !controller.signal.aborted) response.status(503)
+    } finally {
+      clearTimeout(timer)
+      if (!response.writableEnded) response.end()
+    }
   })
 
   router.put<{ id: string }>('/:id/lectura', requireRole(), async (request, response) => {

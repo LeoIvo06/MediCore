@@ -3,6 +3,8 @@ import type { CreateEquipmentIncidentCommand } from '../../../domain/model/comma
 import type { EquipmentIncidentRepository } from '../../../domain/repositories/EquipmentIncidentRepository.js'
 import type { ExternalOperationalReferencesService } from '../outboundservices/acl/ExternalOperationalReferencesService.js'
 
+import { canResolveIncident } from '../../../domain/services/IncidentAccessPolicy.js'
+
 type Field = keyof CreateEquipmentIncidentCommand
 
 export class EquipmentIncidentCommandService {
@@ -10,6 +12,12 @@ export class EquipmentIncidentCommandService {
     private readonly references: ExternalOperationalReferencesService,
     private readonly incidents: EquipmentIncidentRepository,
   ) {}
+
+  async resolve(number: number, actor: DemoPrincipal) {
+    if (!canResolveIncident(actor, 'Biomédica')) return { status: 'forbidden' as const }
+    const incident = await this.incidents.resolve(number)
+    return incident ? { status: 'found' as const, incident } : { status: 'missing' as const }
+  }
 
   async create(command: CreateEquipmentIncidentCommand, reporter: DemoPrincipal) {
     const missing = (['equipmentId', 'locationId', 'symptomId'] as const).filter((field) => !command[field])

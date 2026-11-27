@@ -27,12 +27,19 @@ export class DemoApiError extends Error {
 
 const sessions = new Map<UserRole, Promise<DemoSession>>()
 
-async function request<T>(path: string, options?: RequestInit): Promise<T> {
+async function requestResponse(path: string, options?: RequestInit) {
   const response = await fetch(`/api${path}`, options)
-  const body = await response.json().catch(() => null)
-  if (!response.ok || body === null) {
+  if (!response.ok) {
+    const body = await response.json().catch(() => null)
     throw new DemoApiError(response.status, body?.error ?? 'No se pudo consultar MediCore.', body?.fields)
   }
+  return response
+}
+
+async function request<T>(path: string, options?: RequestInit): Promise<T> {
+  const response = await requestResponse(path, options)
+  const body = await response.json().catch(() => null)
+  if (body === null) throw new DemoApiError(response.status, 'No se pudo consultar MediCore.')
   return body as T
 }
 
@@ -54,7 +61,9 @@ function signIn(role: UserRole) {
   return pending
 }
 
-export async function demoApi<T>(role: UserRole, path: string, options: RequestInit = {}): Promise<T> {
+async function authenticatedRequest<T>(
+  role: UserRole, path: string, options: RequestInit, transport: (path: string, options: RequestInit) => Promise<T>,
+): Promise<T> {
   let pending = sessions.get(role) ?? signIn(role)
   const session = await pending
   if (Date.parse(session.expiresAt) <= Date.now()) {
@@ -65,7 +74,7 @@ export async function demoApi<T>(role: UserRole, path: string, options: RequestI
     options.signal?.throwIfAborted()
     const headers = new Headers(options.headers)
     headers.set('Authorization', `Bearer ${token}`)
-    return request<T>(path, { ...options, headers })
+    return transport(path, { ...options, headers })
   }
 
   try {
@@ -75,4 +84,12 @@ export async function demoApi<T>(role: UserRole, path: string, options: RequestI
     const current = sessions.get(role)
     return send(current && current !== pending ? current : signIn(role))
   }
+}
+
+export function demoApi<T>(role: UserRole, path: string, options: RequestInit = {}) {
+  return authenticatedRequest(role, path, options, request<T>)
+}
+
+export function demoEventStream(role: UserRole, path: string, signal: AbortSignal) {
+  return authenticatedRequest(role, path, { signal, headers: { Accept: 'text/event-stream' } }, requestResponse)
 }

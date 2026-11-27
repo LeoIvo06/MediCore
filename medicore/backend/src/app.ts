@@ -1,5 +1,7 @@
 import express from 'express'
+import { GeneralServicesIncidentCommandService } from './incidencias/application/internal/commandservices/GeneralServicesIncidentCommandService.js'
 import { IncidentNotificationService } from './incidencias/application/internal/IncidentNotificationService.js'
+import { createIncidentNotificationStream } from './incidencias/infrastructure/persistence/prisma/adapters/IncidentNotificationStream.js'
 import { IncidentNotificationRepositoryAdapter } from './incidencias/infrastructure/persistence/prisma/adapters/IncidentNotificationRepositoryAdapter.js'
 import { createIncidentNotificationsController } from './incidencias/interfaces/rest/IncidentNotificationsController.js'
 import { GeneralServicesIncidentQueryService } from './incidencias/application/internal/queryservices/GeneralServicesIncidentQueryService.js'
@@ -30,7 +32,7 @@ import { createDemoSessionController } from './shared/interfaces/rest/DemoSessio
 import { globalExceptionHandler } from './shared/interfaces/rest/GlobalExceptionHandler.js'
 import { createHealthController } from './shared/interfaces/rest/HealthController.js'
 
-export function createApp(prisma: PrismaClient) {
+export function createApp(prisma: PrismaClient, notificationConnection?: string) {
   const app = express()
   app.disable('x-powered-by')
   app.use(express.json({ limit: '16kb' }))
@@ -55,10 +57,13 @@ export function createApp(prisma: PrismaClient) {
   app.use('/api', createITAlertsController(
     new ITAlertCommandService(externalReferences, alerts), new ITAlertQueryService(alerts), requireRole,
   ))
-  const generalServices = new GeneralServicesIncidentQueryService(new GeneralServicesIncidentRepositoryAdapter(prisma))
-  app.use('/api/servicios-generales', createGeneralServicesIncidentsController(generalServices, requireRole))
+  const generalServices = new GeneralServicesIncidentRepositoryAdapter(prisma)
+  app.use('/api/servicios-generales', createGeneralServicesIncidentsController(
+    new GeneralServicesIncidentQueryService(generalServices), new GeneralServicesIncidentCommandService(generalServices), requireRole,
+  ))
   const notifications = new IncidentNotificationService(new IncidentNotificationRepositoryAdapter(prisma))
-  app.use('/api/notificaciones', createIncidentNotificationsController(notifications, requireRole))
+  const notificationStream = notificationConnection ? createIncidentNotificationStream(notificationConnection) : undefined
+  app.use('/api/notificaciones', createIncidentNotificationsController(notifications, requireRole, notificationStream))
   app.use(globalExceptionHandler)
   return app
 }

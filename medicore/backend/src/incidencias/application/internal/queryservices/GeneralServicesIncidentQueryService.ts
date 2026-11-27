@@ -4,8 +4,8 @@ import { groupActiveIncidentsByFloor } from '../../../domain/services/GeneralSer
 export class GeneralServicesIncidentQueryService {
   constructor(private readonly repository: GeneralServicesIncidentRepository) {}
 
-  async listByFloor() {
-    return groupActiveIncidentsByFloor(await this.repository.listActive())
+  async listByFloor(includeResolved = false) {
+    return groupActiveIncidentsByFloor(await this.repository.list(includeResolved), includeResolved)
   }
 
   find(id: string) {

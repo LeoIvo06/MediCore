@@ -11,7 +11,7 @@ if (!Number.isInteger(port) || port < 1 || port > 65535) {
 }
 
 const prisma = createPrismaClient(databaseUrl)
-const app = createApp(prisma)
+const app = createApp(prisma, process.env.DATABASE_URL_UNPOOLED ?? databaseUrl)
 const host = '127.0.0.1'
 const server = app.listen(port, host, () => {
   console.log(`MediCore API en http://${host}:${port}`)

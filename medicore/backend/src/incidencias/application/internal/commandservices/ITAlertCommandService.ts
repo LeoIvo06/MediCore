@@ -2,7 +2,7 @@ import type { DemoPrincipal } from '../../../../shared/domain/security/DemoPrinc
 import { itAlertScope, missingStationData } from '../../../domain/model/aggregates/ITAlert.js'
 import type { CreateITAlertCommand } from '../../../domain/model/commands/CreateITAlertCommand.js'
 import type { ITAlertRepository } from '../../../domain/repositories/ITAlertRepository.js'
-import { canConfirmAlert } from '../../../domain/services/IncidentAccessPolicy.js'
+import { canConfirmAlert, canResolveIncident } from '../../../domain/services/IncidentAccessPolicy.js'
 import type { ExternalOperationalReferencesService } from '../outboundservices/acl/ExternalOperationalReferencesService.js'
 
 export class ITAlertCommandService {
@@ -10,6 +10,12 @@ export class ITAlertCommandService {
     private readonly references: Pick<ExternalOperationalReferencesService, 'getStationConfiguration'>,
     private readonly alerts: ITAlertRepository,
   ) {}
+
+  async resolve(number: number, actor: DemoPrincipal) {
+    if (!canResolveIncident(actor, 'TI')) return { status: 'forbidden' as const }
+    const incident = await this.alerts.resolve(number)
+    return incident ? { status: 'found' as const, alert: incident } : { status: 'missing' as const }
+  }
 
   async create({ stationId }: CreateITAlertCommand, actor: DemoPrincipal) {
     const station = stationId ? await this.references.getStationConfiguration(stationId) : null

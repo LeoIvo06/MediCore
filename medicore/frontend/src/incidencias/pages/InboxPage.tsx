@@ -23,9 +23,9 @@ function IncidentInbox({ role }: { role: 'it-support' | 'biomedical' | 'general-
   const isIT = role === 'it-support'
   const isBiomedical = role === 'biomedical'
   const title = isIT ? 'Bandeja de soporte TI' : isBiomedical ? 'Bandeja biomédica' : 'Lista de incidentes'
-  const description = isIT ? 'Alertas rápidas recibidas de Admisión.' : isBiomedical ? 'Incidentes relacionados con equipos médicos.' : 'Incidentes activos agrupados por piso y prioridad.'
+  const description = isIT ? 'Alertas rápidas recibidas de Admisión.' : isBiomedical ? 'Incidentes relacionados con equipos médicos.' : 'Incidentes agrupados por piso y prioridad.'
   const inbox = useDemoQuery<Incident[]>(role, isIT ? supportAlertsPath : isBiomedical ? equipmentIncidentsPath : null)
-  const generalServices = useDemoQuery<GeneralServicesFloorGroup[]>(role, isGeneralServices ? generalServicesIncidentsPath : null)
+  const generalServices = useDemoQuery<GeneralServicesFloorGroup[]>(role, isGeneralServices ? `${generalServicesIncidentsPath}?incluirResueltos=1` : null)
   const { loading, error } = isGeneralServices ? generalServices : inbox
   const incomingGroups = isGeneralServices ? generalServices.data ?? [] : [{
     floor: null,

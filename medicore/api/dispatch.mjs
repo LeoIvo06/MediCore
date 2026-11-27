@@ -24,7 +24,7 @@ export default function handler(request, response) {
       response.end(JSON.stringify({ status: 'unavailable', database: 'unavailable' }))
       return
     }
-    app = createApp(createPrismaClient(connectionString))
+    app = createApp(createPrismaClient(connectionString), process.env.DATABASE_URL_UNPOOLED)
   }
 
   app(request, response)

@@ -11,9 +11,10 @@ function setup(station: { id: string; location: string | null; ip: string | null
   const writes: ITAlertDraft[] = []
   let confirmations = 0
   const repository: ITAlertRepository = {
+    async resolve() { return null },
     async create(draft) {
       writes.push(draft)
-      return { ...draft, number: 1, createdAt: new Date(0), acknowledgedAt: null }
+      return { ...draft, number: 1, createdAt: new Date(0), acknowledgedAt: null, resolvedAt: null }
     },
     async findByNumber() { return null },
     async list() { return [] },

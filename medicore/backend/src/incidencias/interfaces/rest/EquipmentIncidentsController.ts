@@ -5,6 +5,12 @@ import type { EquipmentIncidentQueryService } from '../../application/internal/q
 import { toEquipmentIncidentCommand } from './transform/CreateEquipmentIncidentCommandFromResourceAssembler.js'
 import { toEquipmentIncidentResource } from './transform/EquipmentIncidentResourceFromEntityAssembler.js'
 
+function equipmentNumber(id: string) {
+  const match = /^INC-EQ-(\d{6,10})$/.exec(id)
+  const number = Number(match?.[1])
+  return number > 0 && number <= 2147483647 && String(number).padStart(6, '0') === match?.[1] ? number : null
+}
+
 export function createEquipmentIncidentsController(
   commands: EquipmentIncidentCommandService,
   queries: EquipmentIncidentQueryService,
@@ -27,16 +33,28 @@ export function createEquipmentIncidentsController(
   })
 
   router.get<{ id: string }>('/equipos/:id', requireRole('nursing', 'biomedical'), async (request, response) => {
-    const match = /^INC-EQ-(\d{6,10})$/.exec(request.params.id)
-    const number = Number(match?.[1])
-    const valid = number > 0 && number <= 2147483647 && String(number).padStart(6, '0') === match?.[1]
-    const result = valid ? await queries.find(number, response.locals.principal) : { status: 'missing' as const }
+    const number = equipmentNumber(request.params.id)
+    const result = number === null ? { status: 'missing' as const } : await queries.find(number, response.locals.principal)
     if (result.status === 'missing') {
       response.status(404).json({ error: 'Incidente no encontrado.' })
       return
     }
     if (result.status === 'forbidden') {
       response.status(403).json({ error: 'No tienes acceso a este incidente.' })
+      return
+    }
+    response.json(toEquipmentIncidentResource(result.incident))
+  })
+
+  router.put<{ id: string }>('/equipos/:id/resolucion', requireRole('biomedical'), async (request, response) => {
+    const number = equipmentNumber(request.params.id)
+    const result = number === null ? { status: 'missing' as const } : await commands.resolve(number, response.locals.principal)
+    if (result.status === 'forbidden') {
+      response.status(403).json({ error: 'No tienes acceso a esta operación.' })
+      return
+    }
+    if (result.status === 'missing') {
+      response.status(404).json({ error: 'Incidente no encontrado.' })
       return
     }
     response.json(toEquipmentIncidentResource(result.incident))

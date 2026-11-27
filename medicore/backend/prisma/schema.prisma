@@ -91,6 +91,8 @@ model EquipmentIncident {
   reporterName  String
   createdAt     DateTime @default(now())
 
+  resolvedAt    DateTime?
+
   @@index([createdAt])
   @@map("equipment_incidents")
 }
@@ -105,6 +107,7 @@ model ITAlert {
   reporterName   String
   createdAt      DateTime  @default(now())
   acknowledgedAt DateTime?
+  resolvedAt     DateTime?
 
   @@index([reporterId, createdAt])
   @@map("it_alerts")
