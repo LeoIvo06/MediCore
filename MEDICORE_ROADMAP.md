@@ -24,8 +24,8 @@ Actualizado el 27 de noviembre de 2026. Usar este registro junto con el prompt m
 | 00 · Auditoría y arquitectura | Alta · EN VALIDACIÓN | Contraste con informe y ULima Market, respaldo y línea base reproducible. |
 | 01 · Sistema visual | Alta · APROBADA | Paleta, tipografía, espaciado, superficies, campos, botones, tablas y estados en los flujos existentes. Sin dependencias nuevas. |
 | 02 · Marca y entrada | Media · APROBADA | Isotipo común y presentación breve, repetible desde Perfil demo. |
-| 03 · Landing | Media · EN VALIDACIÓN | Definir la página pública después de validar la marca. |
-| 04–05 · Acceso y navegación | Alta · PENDIENTE | Navegación por rol parcial. Diseñar acceso real o delimitar el modo demo antes de introducir login público. |
+| 03 · Landing | NO NECESARIA | Retirada por decisión del usuario. La demo abre directamente. |
+| 04–05 · Acceso y navegación | Según demo · PENDIENTE | Priorizar el acceso existente por perfil. El login público queda fuera de la exposición actual. |
 | 06 · Control Center | Media · PENDIENTE | Inicio y accesos rápidos existentes. Definir métricas autorizadas a partir de datos reales. |
 | 07A–C · Incidencias | Alta · PENDIENTE | Formularios, bandejas y detalle existentes. Alinear filtro y planificar avances del Sprint 2. |
 | 07D · Kanban | Baja · PENDIENTE | Opcional. Depende de transiciones acordadas. |
@@ -58,10 +58,6 @@ El prompt maestro guía el desarrollo. La autorización expresa del usuario defi
 - **Pruebas en Vercel.** Edge reprodujo la entrada con temas claro y oscuro y con movimiento reducido. Verificó la carga de catálogos, el favicon, el recurso para compartir y PostgreSQL. [Despliegue](https://vercel.com/carlos-071e/medicore-demo/PLjFUdRpct3Qv4UzYuuHUwyCtneS)
 - **Siguiente fase.** La aprobación de la Fase 02 habilitó la landing pública.
 
-## Fase 03 · Landing pública
+## Fase 03 · Cierre de la landing
 
-- **EN VALIDACIÓN.** La portada en `/` presenta el flujo real, una captura de Servicios Generales con datos ficticios, beneficios y preguntas frecuentes. **Explorar demo** abre `/demo`. Las rutas directas de reportes, alertas, bandeja, incidencias y equipos conservan su URL.
-- **Arquitectura.** La portada pertenece a `frontend/src/app/pages` y reutiliza la marca compartida. El router separa la portada pública de `AppLayout`. Los contextos, el ACL, los contratos REST y la infraestructura conservan la estructura de ULima Market. El acceso por perfiles permanece en la demo. El login público corresponde a la Fase 04.
-- **Pruebas locales.** Build aprobado, nueve pruebas de dominio y arquitectura aprobadas y dos avisos preexistentes de lint. Edge verificó anclas, salto al contenido, FAQ con teclado y acceso a la demo a 320, 390, 768, 1024 y 1440 px. También comprobó movimiento reducido, links directos y repetición de la entrada.
-- **Pruebas en Vercel.** Edge verificó los cinco anchos, el acceso a la demo, la navegación por teclado, el formulario con catálogos, las rutas directas con sus perfiles y la repetición de la entrada. La API respondió con PostgreSQL conectado. [Despliegue](https://vercel.com/carlos-071e/medicore-demo/2RJEXeJdz2ByJPKTxAPy1z1Fr7L7)
-- **Validación manual.** Abrir el dominio, recorrer la portada y pulsar **Explorar demo**. Abrir **Perfil demo**, cambiar de rol y comprobar que la navegación operativa sigue disponible.
+Retirada por decisión del usuario. La aplicación abre en el dominio raíz y conserva /demo y las rutas internas. El frontend deja de incluir la vista, sus estilos y la captura de la portada.

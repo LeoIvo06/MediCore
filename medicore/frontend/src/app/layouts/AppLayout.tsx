@@ -75,7 +75,7 @@ export default function AppLayout() {
 
   const profile = roleLabels[state.activeRole]
   const items = [
-    { to: '/demo', label: 'Inicio', icon: Home },
+    { to: '/', label: 'Inicio', icon: Home },
     ...(state.activeRole === 'nursing' ? [{ to: '/reportar-falla', label: 'Reportar falla', icon: PlusCircle }] : []),
     ...(state.activeRole === 'admissions' ? [{ to: '/alerta-ti', label: 'Alerta rápida', icon: Bell }] : []),
     ...(['general-services', 'it-support', 'biomedical'].includes(state.activeRole) ? [{ to: '/bandeja', label: state.activeRole === 'biomedical' ? 'Bandeja biomédica' : 'Lista de incidentes', icon: ClipboardList }] : []),
@@ -92,7 +92,7 @@ export default function AppLayout() {
   return <div className="min-h-screen bg-page text-ink">
     {launch > finishedLaunch && <MediCoreLaunch key={launch} onFinish={() => setFinishedLaunch(launch)} />}
     <aside className="fixed inset-y-0 left-0 z-30 hidden w-[244px] flex-col bg-sidebar text-white lg:flex">
-      <NavLink to="/demo" className="flex items-center gap-2 px-6 py-4">
+      <NavLink to="/" className="flex items-center gap-2 px-6 py-4">
         <MediCoreBrand />
       </NavLink>
       <div className="flex items-center gap-3 px-5 pb-8">
@@ -100,7 +100,7 @@ export default function AppLayout() {
         <div className="min-w-0"><div className="truncate text-sm font-semibold">{profile.name}</div><div className="mt-0.5 truncate text-xs text-slate-300">{profile.title}</div></div>
       </div>
       <nav className="space-y-1 px-3">
-        {items.map(({ to, label, icon: Icon }) => <NavLink key={to} to={to} end={to === '/demo'} className={({ isActive }) => `flex items-center gap-3 rounded-lg px-3.5 py-3 text-sm transition ${isActive ? 'bg-brand font-semibold text-white' : 'text-slate-300 hover:bg-white/10 hover:text-white'}`}><Icon size={18} />{label}</NavLink>)}
+        {items.map(({ to, label, icon: Icon }) => <NavLink key={to} to={to} end={to === '/'} className={({ isActive }) => `flex items-center gap-3 rounded-lg px-3.5 py-3 text-sm transition ${isActive ? 'bg-brand font-semibold text-white' : 'text-slate-300 hover:bg-white/10 hover:text-white'}`}><Icon size={18} />{label}</NavLink>)}
       </nav>
       <div className="mt-auto border-t border-white/10 px-5 py-5 text-xs text-slate-300"><span className="inline-flex items-center gap-2"><MapPin size={14} />Demo · datos ficticios</span></div>
     </aside>
@@ -182,7 +182,7 @@ export default function AppLayout() {
         </div>
         <nav id="mobile-navigation" hidden={activeMenu !== 'navigation'} aria-label="Navegación principal" className="bg-sidebar px-4 py-2 text-white lg:hidden">
           {items.map(({ to, label }) => (
-            <NavLink onClick={() => setActiveMenu(null)} key={to} to={to} end={to === '/demo'} className="flex min-h-11 items-center rounded-md px-3 text-sm hover:bg-white/10 aria-[current=page]:bg-brand">
+            <NavLink onClick={() => setActiveMenu(null)} key={to} to={to} end={to === '/'} className="flex min-h-11 items-center rounded-md px-3 text-sm hover:bg-white/10 aria-[current=page]:bg-brand">
               {label}
             </NavLink>
           ))}
