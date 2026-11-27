@@ -61,3 +61,10 @@ El prompt maestro guía el desarrollo. La autorización expresa del usuario defi
 ## Fase 03 · Cierre de la landing
 
 Retirada por decisión del usuario. La aplicación abre en el dominio raíz y conserva /demo y las rutas internas. El frontend deja de incluir la vista, sus estilos y la captura de la portada.
+
+## Demo académica · Sprint 2
+
+- **HU-TI3 · EN VALIDACIÓN.** Admisión crea una alerta con una estación habilitada. Soporte TI abre el mismo ticket y registra si la estación respondió y el resultado. PostgreSQL conserva el resultado, el autor de la sesión y la fecha. Si la estación no respondió, ambos perfiles ven la revisión presencial como siguiente acción. Guardar el diagnóstico conserva el estado y el acuse.
+- **Estructura para la exposición.** Formulario `ITDiagnosisCard` → `PUT /api/alertas-ti/:id/diagnostico` → controlador y assembler REST → `ITAlertCommandService` → contrato `ITAlertRepository` → adaptador Prisma. El diagnóstico pertenece al mismo agregado `ITAlert`. El ACL de Referencias Operativas sigue atendiendo la configuración de estaciones en el registro original de la alerta.
+- **Pruebas.** Build completo, 9 pruebas de dominio y arquitectura, y 8 resultados de integración HTTP con PostgreSQL en Docker. Se comprobó autorización, entradas inválidas, identidad del autor, estado abierto, persistencia tras reinicio y rechazo de cambios a un ticket resuelto.
+- **Pendientes del Sprint 2.** Orden biomédica y disponibilidad del equipo (HU-MD2), seguimiento de Enfermería (HU-CM2) e inicio de atención con estimación de Servicios Generales (HU-JUR3). Desarrollar y probar un flujo por vez con los criterios del informe.

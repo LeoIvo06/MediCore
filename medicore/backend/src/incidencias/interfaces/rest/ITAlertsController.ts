@@ -4,6 +4,7 @@ import type { ITAlertCommandService } from '../../application/internal/commandse
 import type { ITAlertQueryService } from '../../application/internal/queryservices/ITAlertQueryService.js'
 import type { ITAlert } from '../../domain/model/aggregates/ITAlert.js'
 import { toITAlertCommand } from './transform/CreateITAlertCommandFromResourceAssembler.js'
+import { toRecordITDiagnosisCommand } from './transform/RecordITDiagnosisCommandFromResourceAssembler.js'
 import { toITAlertResource } from './transform/ITAlertResourceFromEntityAssembler.js'
 
 function alertNumber(id: string) {
@@ -54,6 +55,21 @@ export function createITAlertsController(commands: ITAlertCommandService, querie
   router.put<{ id: string }>('/alertas-ti/:id/acuse', requireRole('it-support'), async (request, response) => {
     const number = alertNumber(request.params.id)
     const result = number === null ? { status: 'missing' as const } : await commands.acknowledge(number, response.locals.principal)
+    sendResult(response, result)
+  })
+
+  router.put<{ id: string }>('/alertas-ti/:id/diagnostico', requireRole('it-support'), async (request, response) => {
+    const number = alertNumber(request.params.id)
+    const result = number === null ? { status: 'missing' as const }
+      : await commands.recordDiagnosis(number, toRecordITDiagnosisCommand(request.body), response.locals.principal)
+    if (result.status === 'invalid') {
+      response.status(422).json({ error: 'Indica si la estación respondió y escribe un resultado de hasta 500 caracteres.' })
+      return
+    }
+    if (result.status === 'unavailable') {
+      response.status(409).json({ error: 'El diagnóstico requiere una alerta abierta con estación identificada.' })
+      return
+    }
     sendResult(response, result)
   })
 

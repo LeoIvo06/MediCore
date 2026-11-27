@@ -64,6 +64,7 @@ test('Sprint 1: las siete historias se ejercitan por HTTP y los datos sobreviven
     priority: string
     ip?: string
     acknowledgedAt?: string
+    diagnosis?: { summary: string; responded: boolean; author: string; recordedAt: string }
     open?: boolean
     status: string
     resolvedAt?: string
@@ -166,6 +167,28 @@ test('Sprint 1: las siete historias se ejercitan por HTTP y los datos sobreviven
     assert.equal((await request<Ticket>(`${alertPath}/${legacyId}`, 200, support)).ip, undefined)
   })
 
+  await t.test('HU-TI3: registra diagnóstico autorizado y conserva abierto el ticket', async () => {
+    const path = `${alertPath}/${alertId}`
+    const route = `${path}/diagnostico`
+    const input = { summary: 'La estación no respondió en la comprobación.', responded: false }
+    await request(route, 401, undefined, 'PUT', input)
+    await request(route, 403, admissions, 'PUT', input)
+    await request(route, 422, support, 'PUT', { ...input, summary: '   ' })
+    await request(route, 422, support, 'PUT', { ...input, responded: 'false' })
+    assert.equal((await request<Ticket>(path, 200, support)).diagnosis, undefined)
+    const saved = await request<Ticket>(route, 200, support, 'PUT', input)
+    assert.equal(saved.id, alertId)
+    assert.equal(saved.open, true)
+    assert.equal(saved.status, 'Confirmada')
+    assert.equal(saved.acknowledgedAt, acknowledgedAt)
+    assert.equal(saved.diagnosis?.summary, input.summary)
+    assert.equal(saved.diagnosis?.responded, false)
+    assert.equal(saved.diagnosis?.author, 'Diego Salazar')
+    assert.ok(Number.isFinite(Date.parse(saved.diagnosis?.recordedAt ?? '')))
+    assert.deepEqual((await request<Ticket>(path, 200, admissions)).diagnosis, saved.diagnosis)
+    await request(path, 403, general)
+  })
+
   await t.test('HU-JUR1 y HU-JUR2: agrupa, prioriza y permite consultar el detalle técnico', async () => {
     const groups = await request<{ floor: number; incidents: Ticket[] }[]>(generalPath, 200, general)
     assert.deepEqual(groups.map(({ floor, incidents }) => [floor, incidents.map(({ id }) => id)]), [
@@ -246,6 +269,8 @@ test('Sprint 1: las siete historias se ejercitan por HTTP y los datos sobreviven
     assert.equal(alert.acknowledgedAt, acknowledgedAt)
     assert.equal(alert.open, false)
     assert.equal(alert.status, 'Resuelto')
+    assert.equal(alert.diagnosis?.responded, false)
+    await request(`${alertPath}/${alertId}/diagnostico`, 409, support, 'PUT', { summary: 'Reintento fuera de estado.', responded: true })
     assert.equal((await request<Ticket>(`${generalPath}/${generalId}`, 200, general)).status, 'Resuelto')
     assert.ok((await request<Notice[]>(notificationPath, 200, biomedical))[0].readAt)
     assert.equal((await request<Notice[]>(notificationPath, 200, nursing))[0].readAt, null)

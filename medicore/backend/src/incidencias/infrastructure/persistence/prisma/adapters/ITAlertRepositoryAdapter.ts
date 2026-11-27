@@ -1,11 +1,21 @@
 import type { PrismaClient } from '../../../../../shared/infrastructure/persistence/prisma/generated/client.js'
 import { itAlertId, itAlertScope, type ITAlertDraft } from '../../../../domain/model/aggregates/ITAlert.js'
-import type { ITAlertRepository } from '../../../../domain/repositories/ITAlertRepository.js'
+import type { ITAlertDiagnosis, ITAlertRepository } from '../../../../domain/repositories/ITAlertRepository.js'
 
 import { recordIncidentNotifications } from './recordIncidentNotifications.js'
 
 export class ITAlertRepositoryAdapter implements ITAlertRepository {
   constructor(private readonly prisma: PrismaClient) {}
+
+  saveDiagnosis(number: number, data: ITAlertDiagnosis) {
+    return this.prisma.$transaction(async (transaction) => {
+      const { count } = await transaction.iTAlert.updateMany({
+        where: { number, resolvedAt: null, stationId: { not: '' } },
+        data,
+      })
+      return count ? transaction.iTAlert.findUnique({ where: { number } }) : null
+    })
+  }
 
   async resolve(number: number) {
     const [, incident] = await this.prisma.$transaction([

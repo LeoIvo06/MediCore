@@ -12,9 +12,10 @@ function setup(station: { id: string; location: string | null; ip: string | null
   let confirmations = 0
   const repository: ITAlertRepository = {
     async resolve() { return null },
+    async saveDiagnosis() { return null },
     async create(draft) {
       writes.push(draft)
-      return { ...draft, number: 1, createdAt: new Date(0), acknowledgedAt: null, resolvedAt: null }
+      return { ...draft, number: 1, createdAt: new Date(0), acknowledgedAt: null, resolvedAt: null, diagnosisSummary: null, diagnosisResponded: null, diagnosedBy: null, diagnosedAt: null }
     },
     async findByNumber() { return null },
     async list() { return [] },

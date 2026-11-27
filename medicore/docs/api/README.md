@@ -36,6 +36,8 @@ El registro recibe `equipmentId`, `locationId` y `symptomId`. Express obtiene el
 
 El envío recibe `stationId`. La ubicación y la IP se consultan por la fachada ACL, y el reportante proviene de la sesión. El detalle omite la IP cuando el ticket no la tiene registrada.
 
+El diagnóstico se registra con PUT /alertas-ti/:id/diagnostico, disponible para Soporte TI. Recibe summary (1–500 caracteres) y responded (booleano). Devuelve 200 con el diagnóstico y el ticket, 422 por datos inválidos y 409 si la alerta está resuelta o carece de estación. El autor y la fecha provienen del servidor. El detalle disponible para el emisor incluye el último diagnóstico.
+
 ### Servicios Generales
 
 | Método y ruta | Acceso | Respuesta |

@@ -107,6 +107,10 @@ model ITAlert {
   reporterName   String
   createdAt      DateTime  @default(now())
   acknowledgedAt DateTime?
+  diagnosisSummary String?
+  diagnosisResponded Boolean?
+  diagnosedBy String?
+  diagnosedAt DateTime?
   resolvedAt     DateTime?
 
   @@index([reporterId, createdAt])

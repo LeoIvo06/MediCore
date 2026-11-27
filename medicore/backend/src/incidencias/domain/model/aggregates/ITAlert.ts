@@ -11,6 +11,10 @@ export interface ITAlert extends ITAlertDraft {
   number: number
   createdAt: Date
   acknowledgedAt: Date | null
+  diagnosisSummary: string | null
+  diagnosisResponded: boolean | null
+  diagnosedBy: string | null
+  diagnosedAt: Date | null
   resolvedAt: Date | null
 }
 

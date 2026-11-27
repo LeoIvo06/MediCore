@@ -7,6 +7,7 @@ export interface Incident {
   id: string; kind: IncidentKind; title: string; description: string; priority: Priority
   status: IncidentStatus; area: string; location: string; floor: number; reportedBy: string
   incidentType?: string; open?: boolean
+  diagnosis?: { summary: string; responded: boolean; author: string; recordedAt: string }
   createdAt: string; symptom?: string; equipmentId?: string; stationId?: string; ip?: string; acknowledgedAt?: string; resolvedAt?: string
 }
 export interface Equipment { id: string; name: string; category: string; location: string; assetCode: string; brand: string; model: string }

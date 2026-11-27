@@ -18,5 +18,11 @@ export function toITAlertResource(alert: ITAlert) {
     stationId: alert.stationId,
     ip: alert.ip ?? undefined,
     acknowledgedAt: alert.acknowledgedAt?.toISOString(),
+    diagnosis: alert.diagnosedAt && alert.diagnosisSummary && alert.diagnosisResponded !== null && alert.diagnosedBy ? {
+      summary: alert.diagnosisSummary,
+      responded: alert.diagnosisResponded,
+      author: alert.diagnosedBy,
+      recordedAt: alert.diagnosedAt.toISOString(),
+    } : undefined,
   }
 }
